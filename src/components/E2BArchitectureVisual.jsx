@@ -1,768 +1,718 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  ShieldAlert, 
-  RotateCcw, 
-  Users, 
-  Zap, 
-  Layers, 
-  Lock, 
-  Cpu, 
-  Terminal, 
-  Activity, 
-  CheckCircle2, 
-  XCircle,
-  Eye,
-  Sliders,
-  Play,
-  RefreshCw,
-  Sparkles
-} from 'lucide-react';
 
 /**
- * Beyond E2B: The Next-Gen Autonomous Control & Time-Travel Stack
+ * 3D Isometric Control Plane Architecture (Claude Engine + E2B Split Sticky Layout)
  * 
- * What makes this radically different from E2B:
- * 1. E2B is just a dumb sandbox container.
- * 2. THIS PLATFORM adds:
- *    - Differentiator 1: "Autonomous Time-Travel State Repair" (2-phase compensating rollback ledger)
- *    - Differentiator 2: "Cross-Agent Adversarial Consensus Mesh" (Heterogeneous model quorum)
- *    - True Differential 3D Depth (Exploded view slider separating the layers in true 3D space)
- *    - Interactive 32-node Sandbox Fleet (Hover & click any microVM keycap to inspect real live telemetry)
- *    - "Simulate Rogue Action & Time-Travel Rollback" interactive trigger
+ * - Left side: Sticky / pinned 3D isometric diagram with interactive mouse tilt,
+ *   animated packet transit, gate interception, human-in-the-loop pause, and explode slider.
+ * - Right side: Scrollable legends & specs (E2B-style "Through the Boundary",
+ *   Task In / Route / Gate / PR Out lifecycle steps, and Budget / Circuit breaker gauges).
  */
 export default function E2BArchitectureVisual() {
-  const containerRef = useRef(null);
+  const stageRef = useRef(null);
+  const svgRef = useRef(null);
 
-  // 3D Parallax & Exploded View States
-  const [tilt, setTilt] = useState({ x: -12, y: 15 });
-  const [explodeLevel, setExplodeLevel] = useState(1.4); // 0.8 (compact) to 2.4 (fully exploded)
-  const [isExploded, setIsExploded] = useState(false);
+  // 3D Engine State
+  const [explodeGap, setExplodeGap] = useState(88); // 55 to 115
+  const [hoveredLayer, setHoveredLayer] = useState(-1);
+  const [tiltTarget, setTiltTarget] = useState(0);
 
-  // Interactive Sandbox Fleet States (32 keys)
-  const [activeLeds, setActiveLeds] = useState([3, 7, 12, 18, 22, 29]);
-  const [selectedSandbox, setSelectedSandbox] = useState(null);
-  const [hoveredSection, setHoveredSection] = useState(null);
+  // References to keep requestAnimationFrame loop updated without recreating
+  const stateRef = useRef({
+    th: 0,
+    tt: 0,
+    g: 88,
+    hl: -1,
+  });
 
-  // Rogue Simulation & Time-Travel Rollback States (The Big Differentiator)
-  const [simState, setSimState] = useState('idle'); // 'idle' | 'rogue_attempt' | 'quorum_veto' | 'time_travel_rewind' | 'restored'
-  const [simLog, setSimLog] = useState('System ready. Hover over any layer or click a sandbox to inspect.');
+  stateRef.current.g = explodeGap;
+  stateRef.current.hl = hoveredLayer;
+  stateRef.current.tt = tiltTarget;
 
-  // Mouse Parallax Physics
-  const handleMouseMove = (e) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({
-      x: -y * 22, // pitch
-      y: x * 26   // yaw
-    });
+  // Track scroll position to conditionally highlight steps
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+
+  // Mouse tilt on the 3D stage
+  const handlePointerMove = (e) => {
+    if (!stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    const normalizedX = (e.clientX - rect.left) / rect.width - 0.5;
+    setTiltTarget(normalizedX * 1.1);
   };
 
-  const handleMouseLeave = () => {
-    setTilt({ x: -10, y: 14 });
+  const handlePointerLeave = () => {
+    setTiltTarget(0);
+    setHoveredLayer(-1);
   };
 
-  // Toggle random LEDs simulating active workloads
+  // SVG Render Loop
   useEffect(() => {
-    if (simState !== 'idle') return;
-    const interval = setInterval(() => {
-      setActiveLeds((prev) => {
-        const next = [...prev];
-        const randomKey = Math.floor(Math.random() * 32);
-        if (next.includes(randomKey)) {
-          return next.filter((k) => k !== randomKey);
-        } else {
-          return next.length < 9 ? [...next, randomKey] : next.slice(1).concat(randomKey);
-        }
-      });
-    }, 1500);
-    return () => clearInterval(interval);
-  }, [simState]);
+    const svg = svgRef.current;
+    if (!svg) return;
 
-  // Trigger the Interactive Rogue Action + Time-Travel Rollback Sequence
-  const triggerSimulation = () => {
-    setSimState('rogue_attempt');
-    setSimLog('⚠️ SANDBOX #14: Agent attempted unauthorized DDL mutation: "DROP TABLE prod_users"');
+    let animId;
+    const CX = 390;
+    const CY = 510;
 
-    // Step 2: Adversarial Quorum intercepts
-    setTimeout(() => {
-      setSimState('quorum_veto');
-      setSimLog('🛡️ CONSENSUS MESH: Shadow Auditor (GPT-4o) and Policy Guard VETO tool call in 0.6ms!');
-    }, 1200);
+    const MINT = [168, 230, 207];
+    const VIO = [226, 240, 235];
+    const CY2 = [140, 196, 226];
+    const RED = [251, 113, 133];
+    const S = [340, 260, 260, 260, 260];
+    const Hh = [12, 8, 10, 3, 3];
 
-    // Step 3: Time-Travel Engine engages compensating rollback
-    setTimeout(() => {
-      setSimState('time_travel_rewind');
-      setSimLog('⏪ TIME-TRAVEL ENGINE: Engaging two-phase compensating ledger. Rewinding state to Step 3...');
-    }, 2400);
+    const meta = [
+      ['YOUR CLOUD · VPC', 'AWS · Azure · GCP · on-prem'],
+      ['EPHEMERAL SANDBOXES', 'one microVM per task'],
+      ['CONTROL PLANE', 'router · budget · audit'],
+      ['POLICY & IAM GATE', 'scoped secrets · RBAC'],
+      ['AGENT FLEET', 'any model, hot-swappable']
+    ];
 
-    // Step 4: Fully restored cleanly
-    setTimeout(() => {
-      setSimState('restored');
-      setSimLog('✓ STATE CLEANLY RECOVERED: 0 bytes corrupted. Audit signature sealed.');
-      setTimeout(() => setSimState('idle'), 3500);
-    }, 3800);
-  };
-
-  // Pre-configured mock data for sandbox keys
-  const getSandboxData = (idx) => {
-    const isRogue = simState !== 'idle' && simState !== 'restored' && idx === 14;
-    return {
-      id: `sbx_${(1000 + idx * 43).toString(16)}`,
-      index: idx,
-      runtime: idx % 3 === 0 ? 'Python 3.12' : idx % 3 === 1 ? 'Node.js 22' : 'Go 1.23',
-      task: isRogue ? 'DROP TABLE prod_users (BLOCKED)' : idx % 4 === 0 ? 'PR Code Review' : idx % 4 === 1 ? 'SQL Query Aggregation' : 'Stripe Invoice Audit',
-      spend: `$${(0.02 + idx * 0.08).toFixed(2)}`,
-      bootTime: '58ms',
-      status: isRogue ? 'INTERCEPTED' : activeLeds.includes(idx) ? 'RUNNING' : 'WARM_STANDBY',
-      timeTravelLedger: `${4 + (idx % 8)} snapshots`,
-      quorumProtected: true
+    const P = (x, y, z, th) => {
+      const c = Math.cos(th), s = Math.sin(th);
+      const rx = x * c - y * s;
+      const ry = x * s + y * c;
+      return [CX + (rx - ry) * 0.866, CY + (rx + ry) * 0.5 - z];
     };
+
+    const D = (x, y, th) => {
+      const c = Math.cos(th), s = Math.sin(th);
+      return x * c - y * s + x * s + y * c;
+    };
+
+    const pt = (a) => a.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const rgb = (c, k, a) => `rgba(${(c[0] * k) | 0},${(c[1] * k) | 0},${(c[2] * k) | 0},${a})`;
+
+    function box(x, y, z, w, d, h, top, side, a = 1, st = 'none', sw = 1, dash = '', th) {
+      const c = Math.cos(th), s = Math.sin(th);
+      const Q = [
+        [x, y],
+        [x + w, y],
+        [x + w, y + d],
+        [x, y + d]
+      ];
+      const N = [
+        [0, -1],
+        [1, 0],
+        [0, 1],
+        [-1, 0]
+      ];
+      let o = '';
+      for (let i = 0; i < 4; i++) {
+        const n = N[i];
+        const nx = n[0] * c - n[1] * s;
+        const ny = n[0] * s + n[1] * c;
+        if (nx + ny <= 0) continue;
+        const A = Q[i];
+        const B = Q[(i + 1) % 4];
+        const k = 0.62 + 0.28 * (nx - ny);
+        o += `<polygon points="${pt([
+          P(A[0], A[1], z, th),
+          P(B[0], B[1], z, th),
+          P(B[0], B[1], z + h, th),
+          P(A[0], A[1], z + h, th)
+        ])}" fill="${rgb(side, k, a)}" stroke="${st}" stroke-width="${sw * 0.6}"/>`;
+      }
+      return (
+        o +
+        `<polygon points="${pt(
+          Q.map((q) => P(q[0], q[1], z + h, th))
+        )}" fill="${rgb(top, 1, a)}" stroke="${st}" stroke-width="${sw}"${
+          dash ? ` stroke-dasharray="${dash}"` : ''
+        }/>`
+      );
+    }
+
+    const ln = (x1, y1, x2, y2, z, st, w = 1, th) => {
+      const a = P(x1, y1, z, th);
+      const b = P(x2, y2, z, th);
+      return `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${st}" stroke-width="${w}"/>`;
+    };
+
+    const cols = [-84, -28, 28, 84];
+
+    const tag = (x, y, z, s, c = '#e8f1ee', f = 10, w = 600, th) => {
+      const p = P(x, y, z, th);
+      return `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" fill="${c}" font-size="${f}" font-weight="${w}" text-anchor="middle" font-family="'JetBrains Mono', monospace">${s}</text>`;
+    };
+
+    const io = (z, a, b, c, into, th) => {
+      let p = null;
+      [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1]
+      ].forEach((v) => {
+        const q = P(v[0] * 130, v[1] * 130, z, th);
+        if (!p || q[0] < p[0]) p = q;
+      });
+      const y = p[1];
+      const f = 'font-family="\'JetBrains Mono\', monospace"';
+      return `<rect x="12" y="${y - 19}" width="118" height="38" rx="8" fill="rgba(10,14,18,0.85)" stroke="${c}" stroke-width="1.2"/><text x="22" y="${y - 3}" fill="${c}" font-size="10.5" font-weight="700" ${f}>${a}</text><text x="22" y="${y + 11}" fill="#9fb3ac" font-size="9.5" ${f}>${b}</text><line x1="${into ? 130 : p[0] - 6}" y1="${y}" x2="${into ? p[0] - 6 : 130}" y2="${y}" stroke="${c}" stroke-dasharray="3 3" marker-end="url(#ar)"/>`;
+    };
+
+    let th = 0;
+
+    const frame = (now) => {
+      const t = matchMedia('(prefers-reduced-motion: reduce)').matches ? 2600 : now;
+      const tt = stateRef.current.tt;
+      const g = stateRef.current.g;
+      const hl = stateRef.current.hl;
+
+      th += (tt + Math.sin(t / 2600) * 0.05 - th) * 0.07;
+
+      const Z = [0, 1, 2, 3, 4].map((k) => k * g);
+      const top = (k) => Z[k] + Hh[k];
+
+      // Flying telemetry packets
+      const pk = [];
+      const zT = top(4) + 34;
+      const zE = top(1) + 34;
+
+      [
+        [1, 0, 0],
+        [2, 2, 0.3],
+        [0, 2, 0.6],
+        [3, 1, 0.85]
+      ].forEach(([i, j, ph]) => {
+        const T = 4200;
+        const p = ((t + ph * T) % T) / T;
+        pk.push({ x: cols[i], y: cols[j], z: zT + (zE - zT) * p, c: MINT, r: false });
+      });
+
+      // Red malicious packet getting blocked
+      let red = null;
+      let hold = false;
+      {
+        const T = 7000;
+        const p = ((t + 1800) % T) / T;
+        const zg = top(3) + 9;
+        if (p < 0.45) {
+          pk.push((red = { x: 28, y: -28, z: zT + (zg - zT) * (p / 0.45), c: RED, r: true }));
+        } else if (p < 0.78) {
+          hold = true;
+          pk.push((red = { x: 28, y: -28, z: zg, c: RED, r: true }));
+        }
+      }
+
+      // Yellow packet pausing for human confirmation
+      let ah = false;
+      {
+        const T = 11000;
+        const p = ((t + 4000) % T) / T;
+        const zc = top(2) + 12;
+        let az = null;
+        if (p < 0.3) az = zT + (zc - zT) * (p / 0.3);
+        else if (p < 0.55) {
+          az = zc;
+          ah = true;
+        } else if (p < 0.85) {
+          az = zc + (zE - zc) * ((p - 0.55) / 0.3);
+        }
+        if (az !== null) pk.push({ x: 110, y: -80, z: az, c: [251, 191, 36], r: false });
+      }
+
+      const bucket = (p) => {
+        let b = -1;
+        for (let k = 0; k < 5; k++) if (p.z >= top(k)) b = k;
+        return b;
+      };
+
+      const cube = (x, y, z, s, h, tc, sc, a = 1) =>
+        box(x - s / 2, y - s / 2, z, s, s, h, tc, sc, a, 'none', 1, '', th);
+
+      let o =
+        '<defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L8,4L0,8z" fill="#9fb3ac"/></marker></defs>';
+
+      const labels = [];
+      [
+        [-130, -130],
+        [130, -130],
+        [-130, 130]
+      ].forEach(([x, y]) => {
+        const a = P(x, y, 12, th);
+        const b = P(x, y, top(4), th);
+        o += `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="rgba(255,255,255,.14)" stroke-dasharray="2 5"/>`;
+      });
+
+      for (let k = 0; k < 5; k++) {
+        const z = Z[k];
+        const s2 = S[k] / 2;
+        const on = hl === k;
+        let l = '';
+        const st = on ? 'rgba(168,230,207,.95)' : 'rgba(255,255,255,.2)';
+
+        // Layer 0: Your Cloud / VPC
+        if (k === 0) {
+          l += box(-s2, -s2, z, S[k], S[k], 12, [22, 34, 31], [12, 19, 17], 1, st, on ? 1.6 : 1, '', th);
+          for (let i = 1; i < 8; i++) {
+            const u = -s2 + (S[k] * i) / 8;
+            l +=
+              ln(u, -s2, u, s2, z + 12, 'rgba(168,230,207,.10)', 1, th) +
+              ln(-s2, u, s2, u, z + 12, 'rgba(168,230,207,.10)', 1, th);
+          }
+          l +=
+            `<polygon points="${pt(
+              [
+                [-150, -150],
+                [150, -150],
+                [150, 150],
+                [-150, 150]
+              ].map((q) => P(q[0], q[1], z + 12, th))
+            )}" fill="rgba(168,230,207,.05)" stroke="rgba(168,230,207,.6)" stroke-dasharray="6 5"/>` +
+            tag(105, 105, z + 16, 'YOUR NETWORK BOUNDARY', '#b5ecd4', 9, 700, th);
+        }
+
+        // Layer 1: Ephemeral Sandboxes (Grid of microVMs)
+        if (k === 1) {
+          l += box(-s2, -s2, z, S[k], S[k], 8, [17, 27, 43], [9, 15, 25], 1, st, on ? 1.6 : 1, '', th);
+          const cs = [];
+          for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) cs.push([i, j]);
+          cs.sort((a, b) => D(cols[a[0]], cols[a[1]], th) - D(cols[b[0]], cols[b[1]], th));
+          cs.forEach(([i, j]) => {
+            const act = (i * 3 + j * 5 + Math.floor(t / 1300)) % 6 === 0;
+            const h = act ? 22 + 4 * Math.sin(t / 260 + i) : 14;
+            l += cube(cols[i], cols[j], z + 8, 38, h, act ? MINT : [34, 48, 70], act ? [70, 125, 105] : [19, 29, 44]);
+            if (act) l += tag(cols[i], cols[j], z + 8 + h + 10, 'PR ✓', '#b5ecd4', 9, 700, th);
+          });
+        }
+
+        // Layer 2: Control Plane (Router, Budget, Audit)
+        if (k === 2) {
+          l += box(-s2, -s2, z, S[k], S[k], 10, [13, 38, 34], [7, 22, 20], 1, st, on ? 1.6 : 1, '', th);
+          const ch = [
+            [-110, MINT, 'ROUTER', 'hot-swap'],
+            [-35, CY2, 'BUDGET', '$142/$500'],
+            [40, VIO, 'AUDIT', 1280 + Math.floor(t / 400) + ' evts']
+          ];
+          ch.sort((a, b) => D(a[0], 0, th) - D(b[0], 0, th));
+          ch.forEach(([x, c, n, m]) => {
+            l +=
+              box(x, -31, z + 10, 62, 62, 14 + (on ? 4 : 0), c, c.map((v) => v * 0.45), 1, 'none', 1, '', th) +
+              tag(x + 31, 0, z + 44, n, '#ffffff', 9.5, 700, th) +
+              tag(x + 31, 0, z + 33, m, '#cfeee0', 8.5, 400, th);
+          });
+          if (ah) {
+            const r = 14 + 6 * Math.sin(t / 140);
+            l +=
+              `<polygon points="${pt(
+                [
+                  [-1, -1],
+                  [1, -1],
+                  [1, 1],
+                  [-1, 1]
+                ].map((v) => P(110 + v[0] * r, -80 + v[1] * r, z + 10, th))
+              )}" fill="rgba(251,191,36,.22)" stroke="#fbbf24" stroke-width="2"/>` +
+              tag(110, -80, z + 38, 'ASKING HUMAN…', '#fbbf24', 9.5, 700, th);
+          }
+        }
+
+        // Layer 3: Policy & IAM Gate (Command Filter & Block)
+        if (k === 3) {
+          const blk = hold;
+          l += box(
+            -s2,
+            -s2,
+            z,
+            S[k],
+            S[k],
+            3,
+            blk ? RED : VIO,
+            blk ? RED : VIO,
+            blk ? 0.26 : 0.16,
+            on ? 'rgba(168,230,207,.95)' : blk ? 'rgba(251,113,133,.9)' : 'rgba(226,240,235,.85)',
+            1.3,
+            '7 5',
+            th
+          );
+          const sx = -s2 + S[k] * ((t / 2600) % 1);
+          l +=
+            ln(sx, -s2, sx, s2, z + 3, 'rgba(240,250,246,.8)', 2, th) +
+            tag(-60, 105, z + 10, 'SCOPED TOKENS · RBAC · PRE-DISPATCH', '#e4f3ec', 8.5, 700, th);
+          if (hold) {
+            const r = 20 + 8 * Math.sin(t / 120);
+            const q = [
+              [-1, -1],
+              [1, -1],
+              [1, 1],
+              [-1, 1]
+            ].map((v) => P(red.x + v[0] * r, red.y + v[1] * r, z + 3, th));
+            l +=
+              `<polygon points="${pt(q)}" fill="rgba(251,113,133,.25)" stroke="#fb7185" stroke-width="2"/>` +
+              tag(red.x, red.y, z + 42, '✕ BLOCKED', '#fb7185', 10.5, 700, th);
+          }
+        }
+
+        // Layer 4: Agent Fleet
+        if (k === 4) {
+          l += box(-s2, -s2, z, S[k], S[k], 3, [226, 232, 240], [226, 232, 240], 0.07, st, on ? 1.6 : 1, '4 5', th);
+          const ag = [
+            [-85, -50, 'Claude'],
+            [-35, 70, 'Gemini'],
+            [25, -80, 'GPT'],
+            [60, 35, 'Llama'],
+            [95, -15, 'Claude']
+          ].sort((a, b) => D(a[0], a[1], th) - D(b[0], b[1], th));
+          ag.forEach(([x, y, n]) => {
+            const bad = n === 'Gemini' && t % 9000 < 3500;
+            const zz = z + 14 + 5 * Math.sin(t / 700 + x);
+            l +=
+              cube(x, y, zz, 30, 26, bad ? RED : [226, 232, 240], bad ? RED.map((v) => v * 0.5) : [100, 116, 139]) +
+              tag(x, y, zz + 38, bad ? 'Gemini ✕ → Claude' : n, bad ? '#fb7185' : '#cbd5e1', 9, 600, th);
+          });
+        }
+
+        o += `<g data-i="${k}" style="cursor:pointer" opacity="${hl < 0 || on ? 1 : 0.45}">${l}</g>`;
+
+        // Render traveling packets
+        pk.filter((p) => bucket(p) === k)
+          .sort((a, b) => D(a.x, a.y, th) - D(b.x, b.y, th))
+          .forEach((p) => {
+            o += cube(p.x, p.y, p.z, 13, 13, p.c, p.c.map((v) => v * 0.5));
+          });
+
+        // Layer anchor on the right
+        let best = null;
+        [
+          [-1, -1],
+          [1, -1],
+          [1, 1],
+          [-1, 1]
+        ].forEach((v) => {
+          const q = P(v[0] * s2, v[1] * s2, top(k), th);
+          if (!best || q[0] > best[0]) best = q;
+        });
+        labels.push([k, best, on]);
+      }
+
+      // Connecting lines to right labels inside SVG
+      labels.forEach(([k, b, on]) => {
+        const y = b[1].toFixed(1);
+        o += `<g data-i="${k}" style="cursor:pointer"><line x1="${(b[0] + 8).toFixed(1)}" y1="${y}" x2="630" y2="${y}" stroke="${
+          on ? '#b5ecd4' : 'rgba(255,255,255,.24)'
+        }" stroke-dasharray="3 4"/><circle cx="${b[0].toFixed(1)}" cy="${y}" r="3.5" fill="${
+          on ? '#b5ecd4' : '#9fb3ac'
+        }"/><text x="640" y="${(b[1] - 3).toFixed(1)}" fill="${
+          on ? '#b5ecd4' : '#e8f1ee'
+        }" font-size="11" font-weight="700" letter-spacing="0.8" font-family="'JetBrains Mono', monospace">${
+          meta[k][0]
+        }</text><text x="640" y="${(b[1] + 12).toFixed(1)}" fill="#8aa099" font-size="10" font-family="'JetBrains Mono', monospace">${
+          meta[k][1]
+        }</text></g>`;
+      });
+
+      // Left badges
+      o += io(top(4), 'TASK IN', 'issue #402', '#93c5fd', 1, th);
+      o += io(top(1), 'PR OUT', 'tests passed ✓', '#b5ecd4', 0, th);
+      o += io(top(2), 'ASK A HUMAN', 'Slack · #eng', '#fbbf24', 0, th);
+
+      // Top HUD indicator
+      const hud = hold
+        ? ['✕ BLOCKED  rm -rf /prod/db  ·  policy: destructive command', '#fb7185']
+        : ah
+        ? ['⏸ PAUSED  ·  asked #eng on Slack: enum or text column?', '#fbbf24']
+        : ['✓ 4 tasks dispatched  ·  scoped tokens issued  ·  budget ok', '#b5ecd4'];
+
+      o += `<text x="24" y="38" fill="${hud[1]}" font-size="12" font-weight="700" font-family="'JetBrains Mono', monospace">${hud[0]}</text>`;
+
+      svg.innerHTML = o;
+      animId = requestAnimationFrame(frame);
+    };
+
+    animId = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  // Listen to pointer movements on the SVG to detect layer hover
+  const handleSvgPointerMove = (e) => {
+    const target = e.target.closest('[data-i]');
+    setHoveredLayer(target ? +target.dataset.i : -1);
   };
 
-  const currentElevation = isExploded ? 2.2 : explodeLevel;
+  const layersInfo = [
+    {
+      id: 4,
+      name: '04 · AGENT FLEET',
+      sub: 'Any model, hot-swappable',
+      desc: 'Coding agents running on Claude 3.5, GPT-4o, Gemini 1.5 or local models. If a model hallucinates, the control layer hot-swaps it transparently.'
+    },
+    {
+      id: 3,
+      name: '03 · POLICY & IAM GATE',
+      sub: 'Scoped secrets · RBAC · Pre-dispatch intercept',
+      desc: 'Our Pre-Dispatch Policy Interceptor checks every tool invocation before execution. Destructive shell commands (rm -rf /prod/db) are halted in 0.6ms.'
+    },
+    {
+      id: 2,
+      name: '02 · CONTROL PLANE',
+      sub: 'Router · Budget killswitch · Audit ledger',
+      desc: 'Enforces hard per-session token/dollar budgets, orchestrates human approvals via Slack, and hashes every step into an immutable SOC2 audit trail.'
+    },
+    {
+      id: 1,
+      name: '01 · EPHEMERAL SANDBOXES',
+      sub: 'One isolated microVM per task',
+      desc: 'Repo in, verified pull request out. MicroVM boots in 58ms, runs the test suite, emits the patch, and is completely destroyed. Zero lingering state.'
+    },
+    {
+      id: 0,
+      name: '00 · YOUR CLOUD · VPC',
+      sub: 'AWS · Azure · GCP · on-prem',
+      desc: 'Runs inside your virtual private cloud. Sovereign by default: your proprietary code, customer records, and training data never leave your network.'
+    }
+  ];
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto my-12 select-none font-sans">
+    <div className="w-full my-8">
       
-      {/* Top Interactive Controls & Differentiator Bar */}
-      <div className="bg-[#0b0e14] border border-white/[0.08] rounded-2xl p-4 mb-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* SECTION WRAPPER: Split Sticky Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
         
-        {/* Left: Differentiator Title Badge */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-500 p-[1px] shadow-lg shadow-emerald-500/20">
-            <div className="w-full h-full bg-[#0d1017] rounded-[11px] flex items-center justify-center">
-              <Zap className="w-5 h-5 text-emerald-400" />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-white font-bold text-sm tracking-tight">Helm Autonomous Control Stack</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gradient-to-r from-violet-500/20 to-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold">
-                BEYOND RAW SANDBOXES
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              E2B stops at the sandbox. We add <strong className="text-violet-400">Time-Travel Rollback</strong> and <strong className="text-cyan-400">Adversarial Quorum Mesh</strong>.
-            </p>
-          </div>
-        </div>
-
-        {/* Right: Interactive 3D Explode & Rogue Attack Simulation Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+        {/* =========================================================================
+            LEFT COLUMN: STICKY 3D DIAGRAM (Pins to viewport as user scrolls right side)
+        ========================================================================= */}
+        <div className="lg:col-span-7 lg:sticky lg:top-24 z-20">
           
-          {/* Explode View Toggle */}
-          <button
-            onClick={() => setIsExploded(!isExploded)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
-              isExploded
-                ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/20'
-                : 'bg-white/[0.04] text-slate-300 hover:text-white border border-white/[0.08]'
-            }`}
+          <div
+            ref={stageRef}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={handlePointerLeave}
+            className="card relative rounded-2xl border border-white/[0.1] bg-[#070b09] p-3 sm:p-5 shadow-2xl overflow-hidden"
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span>{isExploded ? 'Compact Stack' : 'Explode 3D Layers'}</span>
-          </button>
+            {/* Ambient radial glow */}
+            <div className="absolute inset-0 bg-radial-gradient from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
 
-          {/* SIMULATE ROGUE ATTACK & ROLLBACK BUTTON */}
-          <button
-            onClick={triggerSimulation}
-            disabled={simState !== 'idle'}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-2 shadow-lg ${
-              simState === 'idle'
-                ? 'bg-gradient-to-r from-rose-500 via-violet-600 to-cyan-500 text-white hover:scale-[1.02] shadow-violet-500/20'
-                : 'bg-slate-800 text-slate-400 cursor-wait'
-            }`}
-          >
-            <Play className={`w-3.5 h-3.5 fill-current ${simState !== 'idle' ? 'animate-spin' : ''}`} />
-            <span>{simState === 'idle' ? 'Test Rogue Mutation & Auto-Rollback' : 'Running Simulation...'}</span>
-          </button>
+            {/* SVG 3D Canvas */}
+            <svg
+              ref={svgRef}
+              viewBox="0 0 820 680"
+              role="img"
+              aria-label="Isometric diagram of Helm control plane"
+              onPointerMove={handleSvgPointerMove}
+              className="w-full h-auto select-none touch-pan-y"
+            />
 
-        </div>
-
-      </div>
-
-      {/* Main 3D Viewport */}
-      <div
-        ref={containerRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        className="relative w-full bg-[#050608] rounded-3xl border border-white/[0.08] overflow-hidden p-4 sm:p-8 shadow-2xl flex flex-col items-center justify-center min-h-[580px] sm:min-h-[660px]"
-        style={{ perspective: '1600px' }}
-      >
-        {/* Dynamic ambient backlights based on simulation state */}
-        <div
-          className="absolute inset-0 pointer-events-none transition-all duration-700"
-          style={{
-            background:
-              simState === 'rogue_attempt'
-                ? 'radial-gradient(circle at 50% 50%, rgba(244,63,94,0.25) 0%, transparent 65%)'
-                : simState === 'quorum_veto'
-                ? 'radial-gradient(circle at 50% 50%, rgba(6,182,212,0.25) 0%, transparent 65%)'
-                : simState === 'time_travel_rewind'
-                ? 'radial-gradient(circle at 50% 50%, rgba(139,92,246,0.28) 0%, transparent 65%)'
-                : 'radial-gradient(circle at 50% 50%, rgba(16,185,129,0.12) 0%, transparent 70%)'
-          }}
-        />
-
-        {/* Live HUD Status Ribbon */}
-        <div className="absolute top-4 left-4 right-4 z-20 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#090c12]/90 border border-white/[0.1] text-xs font-mono text-slate-300 backdrop-blur-md">
-            <span className={`w-2 h-2 rounded-full ${
-              simState === 'idle'
-                ? 'bg-emerald-400 animate-pulse'
-                : simState === 'rogue_attempt'
-                ? 'bg-rose-500 animate-ping'
-                : simState === 'quorum_veto'
-                ? 'bg-cyan-400 animate-bounce'
-                : 'bg-violet-400 animate-pulse'
-            }`} />
-            <span className="font-semibold text-white">{simLog}</span>
-          </div>
-
-          <div className="text-[11px] font-mono text-slate-400 bg-[#090c12]/80 px-2.5 py-1 rounded-lg border border-white/[0.06] backdrop-blur-md hidden sm:block">
-            <span>Hover keys to inspect microVM · Drag to tilt</span>
-          </div>
-        </div>
-
-        {/* TRUE 3D STACK CONTAINER WITH DIFFERENTIAL PARALLAX */}
-        <div
-          className="relative w-full max-w-4xl transition-transform duration-200 ease-out transform-gpu mt-6"
-          style={{
-            transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-            transformStyle: 'preserve-3d'
-          }}
-        >
-          <svg
-            viewBox="0 0 1024 640"
-            className="w-full h-auto overflow-visible select-none"
-            style={{ filter: 'drop-shadow(0 30px 45px rgba(0,0,0,0.9))' }}
-          >
-            <defs>
-              {/* Gradients */}
-              <linearGradient id="gridPlateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#1a1c20" />
-                <stop offset="50%" stopColor="#121316" />
-                <stop offset="100%" stopColor="#0a0b0d" />
-              </linearGradient>
-
-              <linearGradient id="timeTravelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#8b5cf6" />
-                <stop offset="50%" stopColor="#06b6d4" />
-                <stop offset="100%" stopColor="#10b981" />
-              </linearGradient>
-
-              {/* Laser / Orbit dashed stroke */}
-              <linearGradient id="laserBeam" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ff4514" />
-                <stop offset="100%" stopColor="#8b5cf6" />
-              </linearGradient>
-
-              {/* Checkerboard Pattern for Cloud Substrate */}
-              <pattern id="checker3D" width="8" height="8" patternUnits="userSpaceOnUse">
-                <rect width="4" height="4" fill="rgba(255,255,255,0.12)" />
-                <rect x="4" y="4" width="4" height="4" fill="rgba(255,255,255,0.12)" />
-              </pattern>
-            </defs>
-
-            {/* =========================================================================
-                ORBITAL LASER BEAMS & SATELLITE PATHS
-            ========================================================================= */}
-            <g id="orbital-rays" opacity="0.6">
-              <ellipse
-                cx="512"
-                cy="320"
-                rx="470"
-                ry="210"
-                fill="none"
-                stroke="rgba(255,255,255,0.14)"
-                strokeWidth="1.2"
-                strokeDasharray="6,6"
-              />
-              <ellipse
-                cx="512"
-                cy="325"
-                rx="410"
-                ry="180"
-                fill="none"
-                stroke="rgba(255,255,255,0.08)"
-                strokeWidth="1"
-                strokeDasharray="4,5"
-              />
-            </g>
-
-            {/* =========================================================================
-                LAYER 1: BOTTOM CLOUD SUBSTRATE (Z = -65 * elevation)
-            ========================================================================= */}
-            <g
-              id="layer-bottom-substrate"
-              transform={`translate(0, ${48 * currentElevation})`}
-              className="transition-transform duration-500 ease-out"
-            >
-              {/* Bevel extrusion */}
-              <polygon points="210,352 640,562 640,576 210,366" fill="#08090a" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-              <polygon points="640,562 820,474 820,488 640,576" fill="#0f1113" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-              {/* Top Face */}
-              <polygon points="390,264 820,474 640,562 210,352" fill="#111315" stroke="rgba(255,255,255,0.14)" strokeWidth="1" />
-
-              {/* Substrate Regions */}
-              <polygon points="230,358 400,275 490,319 320,402" fill="url(#checker3D)" opacity="0.75" />
-              <polygon points="270,360 370,311 410,331 310,380" fill="#090a0c" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" />
-              <text x="340" y="348" fill="#ffffff" fontSize="11" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1" transform="rotate(26, 340, 348) skewX(-28)">
-                ⬡ HELM CLOUD
-              </text>
-
-              <polygon points="495,486 630,420 720,464 585,530" fill="url(#checker3D)" opacity="0.75" />
-              <polygon points="525,488 625,439 665,459 565,508" fill="#090a0c" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" />
-              <text x="595" y="476" fill="#ffffff" fontSize="11" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1" transform="rotate(26, 595, 476) skewX(-28)">
-                ☁ YOUR CLOUD
-              </text>
-            </g>
-
-            {/* =========================================================================
-                LAYER 2: MIDDLE CORE ENGINE SLAB (VIVID ACCENT SLAB)
-            ========================================================================= */}
-            <g
-              id="layer-middle-engine"
-              transform="translate(0, 0)"
-              className="transition-transform duration-500 ease-out"
-            >
-              {/* Front Face with Ruler Markings */}
-              <polygon points="210,310 650,525 650,548 210,333" fill="#cc3009" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
-              <polygon points="650,525 830,437 830,460 650,548" fill="#881e04" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
-
-              {/* Physical Millimeter Ruler Marks */}
-              <g stroke="#ffffff" strokeWidth="1" opacity="0.8">
-                {Array.from({ length: 44 }).map((_, i) => {
-                  const t = i / 43;
-                  const x1 = 210 + (650 - 210) * t;
-                  const y1 = 310 + (525 - 310) * t;
-                  const isLong = i % 5 === 0;
-                  return <line key={i} x1={x1} y1={y1} x2={x1} y2={y1 + (isLong ? 12 : 6)} stroke={isLong ? '#ffffff' : 'rgba(255,255,255,0.6)'} />;
-                })}
-              </g>
-
-              {/* Top Face of Core Slab */}
-              <polygon
-                points="390,222 830,437 650,525 210,310"
-                fill={simState === 'quorum_veto' ? '#06b6d4' : simState === 'time_travel_rewind' ? '#8b5cf6' : '#ff4514'}
-                stroke="rgba(0,0,0,0.25)"
-                strokeWidth="1.2"
-                className="transition-colors duration-500"
-              />
-
-              {/* 5 Core Engine Zones */}
-              {/* 1. Stencil Logo */}
-              <text x="280" y="295" fill="#120300" fontSize="28" fontFamily="'JetBrains Mono', monospace" fontWeight="900" letterSpacing="-1" transform="rotate(26, 280, 295) skewX(-28)">
-                HELM
-              </text>
-
-              {/* 2. LIFECYCLE */}
-              <g
-                onMouseEnter={() => setHoveredSection('LIFECYCLE: 58ms microVM snapshot restore')}
-                onMouseLeave={() => setHoveredSection(null)}
-                className="cursor-pointer"
-              >
-                <g transform="translate(385, 305) scale(0.9)">
-                  <polygon points="12,0 24,6 12,12 0,6" fill="#120300" />
-                  <polygon points="0,6 12,12 12,24 0,18" fill="rgba(0,0,0,0.55)" />
-                  <polygon points="12,12 24,6 24,18 12,24" fill="rgba(0,0,0,0.35)" />
-                </g>
-                <text x="375" y="346" fill="#120300" fontSize="9.5" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1" transform="rotate(26, 375, 346) skewX(-28)">
-                  LIFECYCLE
-                </text>
-              </g>
-
-              {/* 3. NETWORK / POLICY */}
-              <g
-                onMouseEnter={() => setHoveredSection('NETWORK: Zero-trust ingress/egress allowlists')}
-                onMouseLeave={() => setHoveredSection(null)}
-                className="cursor-pointer"
-              >
-                <g transform="translate(485, 355) scale(0.85)">
-                  <circle cx="14" cy="14" r="13" fill="none" stroke="#120300" strokeWidth="2.5" />
-                  <ellipse cx="14" cy="14" rx="7" ry="13" fill="none" stroke="#120300" strokeWidth="2" />
-                  <line x1="1" y1="14" x2="27" y2="14" stroke="#120300" strokeWidth="2" />
-                </g>
-                <text x="475" y="396" fill="#120300" fontSize="9.5" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1" transform="rotate(26, 475, 396) skewX(-28)">
-                  NETWORK
-                </text>
-              </g>
-
-              {/* 4. STORAGE & SNAPSHOTS */}
-              <g
-                onMouseEnter={() => setHoveredSection('STORAGE: Copy-on-write diff layers & S3 buckets')}
-                onMouseLeave={() => setHoveredSection(null)}
-                className="cursor-pointer"
-              >
-                <g transform="translate(585, 400) scale(0.9)">
-                  <rect x="0" y="4" width="28" height="6" rx="2" fill="#120300" />
-                  <rect x="0" y="14" width="28" height="6" rx="2" fill="#120300" />
-                </g>
-                <text x="575" y="442" fill="#120300" fontSize="9.5" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1" transform="rotate(26, 575, 442) skewX(-28)">
-                  STORAGE
-                </text>
-              </g>
-
-              {/* 5. OBSERVABILITY */}
-              <g
-                onMouseEnter={() => setHoveredSection('OBSERVABILITY: Real-time traces, metrics & OTLP spans')}
-                onMouseLeave={() => setHoveredSection(null)}
-                className="cursor-pointer"
-              >
-                <g transform="translate(690, 448) scale(0.85)">
-                  <circle cx="12" cy="12" r="10" fill="none" stroke="#120300" strokeWidth="3" />
-                  <line x1="19" y1="19" x2="28" y2="28" stroke="#120300" strokeWidth="3.5" strokeLinecap="round" />
-                </g>
-                <text x="675" y="490" fill="#120300" fontSize="9.5" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1" transform="rotate(26, 675, 490) skewX(-28)">
-                  OBSERVABILITY
-                </text>
-              </g>
-            </g>
-
-            {/* =========================================================================
-                ⭐ OUR DIFFERENTIATOR 1 & 2: THE HOLOGRAPHIC GOVERNANCE WAFER (Z = +20)
-                This layer sits between the engine and the keys!
-            ========================================================================= */}
-            <g
-              id="layer-differentiators"
-              transform={`translate(0, ${-22 * currentElevation})`}
-              className="transition-transform duration-500 ease-out"
-            >
-              {/* Holographic glowing perimeter */}
-              <polygon
-                points="390,185 830,400 650,488 210,273"
-                fill="rgba(139, 92, 246, 0.12)"
-                stroke="url(#timeTravelGrad)"
-                strokeWidth="1.5"
-                strokeDasharray="6,4"
-              />
-
-              {/* Two Prominent Innovation Chips on the Hologram */}
-              {/* Left Badge: TIME-TRAVEL STATE REWIND ENGINE */}
-              <g
-                onClick={triggerSimulation}
-                className="cursor-pointer hover:opacity-100 transition-opacity"
-              >
-                <polygon
-                  points="260,295 440,383 410,398 230,310"
-                  fill="rgba(139, 92, 246, 0.4)"
-                  stroke="#8b5cf6"
-                  strokeWidth="1.2"
+            {/* Bottom Controls Bar: Explode Slider + Legend hint */}
+            <div className="bar mt-3 pt-3 border-t border-white/[0.08] flex flex-wrap items-center justify-between text-xs font-mono text-slate-400 gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <span className="text-slate-300 font-semibold">Explode 3D:</span>
+                <input
+                  type="range"
+                  min="55"
+                  max="115"
+                  value={explodeGap}
+                  onChange={(e) => setExplodeGap(+e.target.value)}
+                  className="accent-[#a8e6cf] w-28 cursor-pointer"
                 />
-                <text
-                  x="330"
-                  y="346"
-                  fill="#ffffff"
-                  fontSize="10"
-                  fontFamily="'JetBrains Mono', monospace"
-                  fontWeight="700"
-                  letterSpacing="0.8"
-                  transform="rotate(26, 330, 346) skewX(-28)"
-                >
-                  ⏪ TIME-TRAVEL LEDGER
-                </text>
-              </g>
-
-              {/* Right Badge: CROSS-AGENT ADVERSARIAL QUORUM */}
-              <g className="cursor-pointer">
-                <polygon
-                  points="470,398 680,500 650,515 440,413"
-                  fill="rgba(6, 182, 212, 0.4)"
-                  stroke="#06b6d4"
-                  strokeWidth="1.2"
-                />
-                <text
-                  x="560"
-                  y="456"
-                  fill="#ffffff"
-                  fontSize="10"
-                  fontFamily="'JetBrains Mono', monospace"
-                  fontWeight="700"
-                  letterSpacing="0.8"
-                  transform="rotate(26, 560, 456) skewX(-28)"
-                >
-                  🛡️ ADVERSARIAL QUORUM MESH
-                </text>
-              </g>
-            </g>
-
-            {/* =========================================================================
-                LAYER 3: TOP SANDBOX MATRIX (Z = +70 * elevation)
-                32 Interactive MicroVM Keycaps with Individual Click & Hover
-            ========================================================================= */}
-            <g
-              id="layer-top-sandboxes"
-              transform={`translate(0, ${-68 * currentElevation})`}
-              className="transition-transform duration-500 ease-out"
-            >
-              {/* Base plate bevel */}
-              <polygon points="210,230 650,445 650,458 210,243" fill="#0d0e10" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" />
-              <polygon points="650,445 830,357 830,370 650,458" fill="#151719" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" />
-              <polygon points="390,142 830,357 650,445 210,230" fill="url(#gridPlateGrad)" stroke="rgba(255,255,255,0.22)" strokeWidth="1.2" />
-
-              {/* 32 Individual Interactive Raised Keycaps */}
-              {Array.from({ length: 4 }).map((_, row) => {
-                return Array.from({ length: 8 }).map((_, col) => {
-                  const idx = row * 8 + col;
-                  const isActive = activeLeds.includes(idx);
-                  const isSelected = selectedSandbox?.index === idx;
-                  const isRogueTarget = simState !== 'idle' && simState !== 'restored' && idx === 14;
-
-                  // Fractional coords
-                  const u0 = 0.04 + col * 0.118;
-                  const u1 = u0 + 0.098;
-                  const v0 = 0.06 + row * 0.23;
-                  const v1 = v0 + 0.18;
-
-                  const getPt = (u, v) => ({
-                    x: 390 + 440 * u - 180 * v,
-                    y: 142 + 215 * u + 88 * v
-                  });
-
-                  const pTop = getPt(u0, v0);
-                  const pRight = getPt(u1, v0);
-                  const pBottom = getPt(u1, v1);
-                  const pLeft = getPt(u0, v1);
-
-                  const pts = `${pTop.x},${pTop.y} ${pRight.x},${pRight.y} ${pBottom.x},${pBottom.y} ${pLeft.x},${pLeft.y}`;
-                  const ledX = (pTop.x + pBottom.x) / 2 + 10;
-                  const ledY = (pTop.y + pBottom.y) / 2 + 5;
-
-                  return (
-                    <g
-                      key={idx}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSandbox(getSandboxData(idx));
-                      }}
-                      className="cursor-pointer group"
-                    >
-                      {/* Bevel front */}
-                      <polygon
-                        points={`${pLeft.x},${pLeft.y} ${pBottom.x},${pBottom.y} ${pBottom.x},${pBottom.y + 2.5} ${pLeft.x},${pLeft.y + 2.5}`}
-                        fill={isRogueTarget ? '#9f1239' : '#0a0b0d'}
-                      />
-                      {/* Bevel right */}
-                      <polygon
-                        points={`${pBottom.x},${pBottom.y} ${pRight.x},${pRight.y} ${pRight.x},${pRight.y + 2.5} ${pBottom.x},${pBottom.y + 2.5}`}
-                        fill={isRogueTarget ? '#881337' : '#141517'}
-                      />
-
-                      {/* Top Face of Keycap */}
-                      <polygon
-                        points={pts}
-                        fill={
-                          isRogueTarget
-                            ? '#f43f5e'
-                            : isSelected
-                            ? '#38bdf8'
-                            : '#191b1f'
-                        }
-                        stroke={
-                          isRogueTarget
-                            ? '#ffe4e6'
-                            : isSelected
-                            ? '#ffffff'
-                            : 'rgba(255,255,255,0.1)'
-                        }
-                        strokeWidth={isSelected || isRogueTarget ? 1.5 : 0.8}
-                        className="transition-colors duration-200 group-hover:fill-[#2a2d33]"
-                      />
-
-                      {/* Hatch Lines */}
-                      <line
-                        x1={pLeft.x * 0.7 + pTop.x * 0.3}
-                        y1={pLeft.y * 0.7 + pTop.y * 0.3}
-                        x2={pLeft.x * 0.5 + pRight.x * 0.5}
-                        y2={pLeft.y * 0.5 + pRight.y * 0.5}
-                        stroke="rgba(255,255,255,0.1)"
-                        strokeWidth="0.8"
-                      />
-
-                      {/* Active LED Light */}
-                      {isActive && (
-                        <g>
-                          <circle
-                            cx={ledX}
-                            cy={ledY}
-                            r="4.5"
-                            fill={isRogueTarget ? '#fda4af' : '#ffffff'}
-                            opacity="0.35"
-                            className="animate-ping"
-                          />
-                          <rect
-                            x={ledX - 2.5}
-                            y={ledY - 2.5}
-                            width="5"
-                            height="5"
-                            fill={isRogueTarget ? '#ffffff' : '#ffffff'}
-                            stroke="#5cc79c"
-                            strokeWidth="0.5"
-                          />
-                        </g>
-                      )}
-                    </g>
-                  );
-                });
-              })}
-            </g>
-
-            {/* =========================================================================
-                LAYER 4: 4 SATELLITE CHIPS INCLUDING QUORUM GUARD
-            ========================================================================= */}
-            {/* 1. SECRETS · IN */}
-            <g id="sat-secrets" transform="translate(865, 275)" className="cursor-pointer hover:scale-105 transition-transform">
-              <polygon points="0,10 55,-17 110,10 55,37" fill="#0d0f12" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" />
-              <polygon points="0,10 55,37 55,44 0,17" fill="#060708" />
-              <polygon points="55,37 110,10 110,17 55,44" fill="#141618" />
-              <g transform="translate(47, 4) scale(0.85)">
-                <rect x="2" y="7" width="12" height="9" rx="1" fill="#ffffff" />
-                <path d="M4,7 V4 A4,4 0 0,1 12,4 V7" fill="none" stroke="#ffffff" strokeWidth="2" />
-              </g>
-              <text x="55" y="68" fill="#ffffff" fontSize="11" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1.2" textAnchor="middle">
-                SECRETS · IN
-              </text>
-            </g>
-
-            {/* 2. MCP TOOLS · OUT */}
-            <g id="sat-mcp" transform="translate(60, 345)" className="cursor-pointer hover:scale-105 transition-transform">
-              <polygon points="0,10 55,-17 110,10 55,37" fill="#0d0f12" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" />
-              <polygon points="0,10 55,37 55,44 0,17" fill="#060708" />
-              <polygon points="55,37 110,10 110,17 55,44" fill="#141618" />
-              <g transform="translate(46, 3) scale(0.9)">
-                <rect x="5" y="5" width="8" height="8" fill="#ffffff" />
-                <line x1="9" y1="1" x2="9" y2="4" stroke="#ffffff" strokeWidth="2" />
-                <line x1="9" y1="14" x2="9" y2="17" stroke="#ffffff" strokeWidth="2" />
-                <line x1="1" y1="9" x2="4" y2="9" stroke="#ffffff" strokeWidth="2" />
-                <line x1="14" y1="9" x2="17" y2="9" stroke="#ffffff" strokeWidth="2" />
-              </g>
-              <text x="55" y="68" fill="#ffffff" fontSize="11" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1.2" textAnchor="middle">
-                MCP TOOLS · OUT
-              </text>
-            </g>
-
-            {/* 3. MODEL CALLS · OUT */}
-            <g id="sat-models" transform="translate(510, 505)" className="cursor-pointer hover:scale-105 transition-transform">
-              <polygon points="0,10 55,-17 110,10 55,37" fill="#0d0f12" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" />
-              <polygon points="0,10 55,37 55,44 0,17" fill="#060708" />
-              <polygon points="55,37 110,10 110,17 55,44" fill="#141618" />
-              <g transform="translate(48, 5) scale(0.85)">
-                <circle cx="3" cy="3" r="1.8" fill="#ffffff" />
-                <circle cx="10" cy="3" r="1.8" fill="#ffffff" />
-                <circle cx="17" cy="3" r="1.8" fill="#ffffff" />
-                <circle cx="3" cy="10" r="1.8" fill="#ffffff" />
-                <circle cx="10" cy="10" r="1.8" fill="#ffffff" />
-                <circle cx="17" cy="10" r="1.8" fill="#ffffff" />
-              </g>
-              <text x="55" y="68" fill="#ffffff" fontSize="11" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1.2" textAnchor="middle">
-                MODEL CALLS · OUT
-              </text>
-            </g>
-
-            {/* 4. ⭐ OUR 4TH SATELLITE CHIP: QUORUM MESH (DIFFERENTIATOR) */}
-            <g id="sat-quorum" transform="translate(860, 430)" className="cursor-pointer hover:scale-105 transition-transform">
-              <polygon points="0,10 55,-17 110,10 55,37" fill="#0b171f" stroke="#06b6d4" strokeWidth="1.2" />
-              <polygon points="0,10 55,37 55,44 0,17" fill="#040d12" />
-              <polygon points="55,37 110,10 110,17 55,44" fill="#0e232e" />
-              <g transform="translate(47, 4) scale(0.85)">
-                <circle cx="6" cy="6" r="3.5" fill="#06b6d4" />
-                <circle cx="14" cy="12" r="3.5" fill="#06b6d4" />
-                <line x1="6" y1="6" x2="14" y2="12" stroke="#06b6d4" strokeWidth="1.5" />
-              </g>
-              <text x="55" y="68" fill="#06b6d4" fontSize="11" fontFamily="'JetBrains Mono', monospace" fontWeight="700" letterSpacing="1.2" textAnchor="middle">
-                QUORUM · SYNC
-              </text>
-            </g>
-
-          </svg>
-        </div>
-
-        {/* Selected MicroVM Sandbox Inspection Drawer */}
-        {selectedSandbox && (
-          <div className="absolute bottom-6 left-6 right-6 sm:right-auto sm:w-96 bg-[#0a0d14]/95 border border-white/[0.12] rounded-2xl p-4 shadow-2xl backdrop-blur-xl z-30 font-mono text-xs">
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-white font-bold">{selectedSandbox.id}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/[0.05] text-slate-400">
-                  Key #{selectedSandbox.index}
+              </label>
+              <div className="flex items-center gap-2 text-[11px]">
+                <span className="flex items-center gap-1 text-[#a8e6cf]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#a8e6cf]"></span> Green: Allowed
+                </span>
+                <span className="flex items-center gap-1 text-[#fb7185]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185]"></span> Red: Blocked
                 </span>
               </div>
-              <button
-                onClick={() => setSelectedSandbox(null)}
-                className="text-slate-400 hover:text-white p-1"
-              >
-                ✕
-              </button>
             </div>
 
-            <div className="space-y-1.5 text-[11px]">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Runtime:</span>
-                <span className="text-slate-200">{selectedSandbox.runtime}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Workload:</span>
-                <span className="text-emerald-300 font-semibold">{selectedSandbox.task}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">State Rollback:</span>
-                <span className="text-violet-400 font-bold">{selectedSandbox.timeTravelLedger}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Quorum Mesh:</span>
-                <span className="text-cyan-400 font-bold">2/2 Shadow Quorum Active</span>
-              </div>
-            </div>
-
-            <div className="mt-3 pt-2 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-[10px] text-slate-500">Boot: {selectedSandbox.bootTime}</span>
-              <button
-                onClick={triggerSimulation}
-                className="px-2.5 py-1 rounded bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-[10px] font-bold flex items-center gap-1"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Test Rewind</span>
-              </button>
-            </div>
           </div>
-        )}
 
-        {/* Section Hover Tooltip */}
-        {hoveredSection && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#0d1017]/95 border border-white/[0.15] text-white text-xs font-mono px-4 py-2 rounded-xl backdrop-blur-md shadow-2xl z-20 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            <span>{hoveredSection}</span>
-          </div>
-        )}
-
-      </div>
-
-      {/* Comparison Grid below 3D model explaining our differentiators vs E2B */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        
-        {/* E2B Baseline */}
-        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs font-mono">
-          <div className="text-slate-400 font-bold mb-1 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-slate-500" />
-            <span>Traditional Agent Cloud (E2B baseline)</span>
-          </div>
-          <p className="text-slate-400 leading-relaxed font-sans text-xs">
-            Provides isolated Linux microVMs. If an agent executes bad SQL or corrupts a file, it only logs the crash after failure. No rollback, no pre-execution quorum.
+          <p className="text-[11px] font-mono text-slate-500 mt-2 text-center hidden lg:block">
+            Diagram remains pinned while you scroll through architecture specifications ↓
           </p>
         </div>
 
-        {/* Our Startup */}
-        <div className="p-4 rounded-xl bg-gradient-to-r from-violet-500/[0.07] to-cyan-500/[0.07] border border-violet-500/30 text-xs font-mono">
-          <div className="text-white font-bold mb-1 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="text-cyan-300">Helm / Guild AI (Our Architecture)</span>
+        {/* =========================================================================
+            RIGHT COLUMN: SCROLLABLE LEGENDS, E2B SPECS, LIFECYCLE & BUDGETS
+        ========================================================================= */}
+        <div className="lg:col-span-5 space-y-6">
+
+          {/* 1. LAYER INSPECTION CARDS (Hovering highlights corresponding 3D layer) */}
+          <div className="space-y-2.5">
+            <div className="text-[11px] font-mono uppercase tracking-wider text-[#a8e6cf] font-bold">
+              [ 01 · CONTROL PLANE ARCHITECTURE ]
+            </div>
+            
+            {layersInfo.map((l) => (
+              <div
+                key={l.id}
+                onMouseEnter={() => setHoveredLayer(l.id)}
+                onMouseLeave={() => setHoveredLayer(-1)}
+                className={`p-3.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                  hoveredLayer === l.id
+                    ? 'bg-[#131d18] border-[#a8e6cf] shadow-md shadow-[#a8e6cf]/15 scale-[1.01]'
+                    : 'bg-[#0a0d0c] border-white/[0.08] hover:border-white/[0.18]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-mono font-bold text-white tracking-wide">
+                    {l.name}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#a8e6cf]">
+                    Layer {l.id}
+                  </span>
+                </div>
+                <div className="text-[11px] font-mono text-slate-400 mb-1.5">
+                  {l.sub}
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                  {l.desc}
+                </p>
+              </div>
+            ))}
           </div>
-          <p className="text-slate-300 leading-relaxed font-sans text-xs">
-            Wraps every sandbox in an <strong>Autonomous Time-Travel Ledger</strong> (rewinding bad state in 40ms) and an <strong>Adversarial Quorum Mesh</strong> (shadow models verifying safety before tool dispatch).
-          </p>
+
+          {/* 2. [ THROUGH THE BOUNDARY ] (Directly matching E2B reference screenshot) */}
+          <div className="p-5 rounded-2xl bg-[#090d0b] border border-[#285A48] shadow-xl space-y-4">
+            <div className="text-[11px] font-mono uppercase tracking-wider text-[#a8e6cf] font-bold">
+              [ THROUGH THE BOUNDARY ]
+            </div>
+
+            <h3 className="text-xl font-extrabold text-white tracking-tight leading-snug">
+              Any model, any tool, your data, your keys.
+            </h3>
+            
+            <p className="text-xs text-slate-400 leading-relaxed">
+              The sandbox reaches out under your egress policy, never around it. 
+              Zero raw credentials touch the agent context.
+            </p>
+
+            <div className="divide-y divide-white/[0.08] text-xs font-mono pt-1">
+              <div className="py-2.5 flex items-start justify-between gap-4">
+                <span className="text-white font-bold shrink-0">Model calls</span>
+                <span className="text-slate-400 text-right">Anthropic · OpenAI · Gemini · open weights</span>
+              </div>
+              <div className="py-2.5 flex items-start justify-between gap-4">
+                <span className="text-white font-bold shrink-0">MCP tools</span>
+                <span className="text-slate-400 text-right">200+ servers, called from inside sandbox</span>
+              </div>
+              <div className="py-2.5 flex items-start justify-between gap-4">
+                <span className="text-white font-bold shrink-0">Your data</span>
+                <span className="text-slate-400 text-right">buckets · repos · private internal APIs</span>
+              </div>
+              <div className="py-2.5 flex items-start justify-between gap-4">
+                <span className="text-[#a8e6cf] font-bold shrink-0">Secrets vault</span>
+                <span className="text-slate-300 text-right">Dynamic egress injection (never leaked)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. LIFECYCLE STEPS: TASK IN -> ROUTE -> GATE -> PR OUT */}
+          <div className="space-y-3">
+            <div className="text-[11px] font-mono uppercase tracking-wider text-[#a8e6cf] font-bold">
+              [ 02 · EXECUTION LIFECYCLE FLOW ]
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              
+              <div className="step bg-[#0a0d0c] border border-white/[0.08] rounded-xl p-3.5 hover:border-[#a8e6cf]/40 transition-colors">
+                <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
+                  01 · TASK IN
+                </span>
+                <b className="text-xs font-bold text-white block mb-1">A task arrives</b>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  An issue like #402 arrives via webhook from GitHub, Jira, Linear or Slack.
+                </p>
+              </div>
+
+              <div className="step bg-[#0a0d0c] border border-white/[0.08] rounded-xl p-3.5 hover:border-[#a8e6cf]/40 transition-colors">
+                <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
+                  02 · ROUTE
+                </span>
+                <b className="text-xs font-bold text-white block mb-1">Right agent, right model</b>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  The control plane picks an agent and automatically hot-swaps models if one fails.
+                </p>
+              </div>
+
+              <div className="step bg-[#0a0d0c] border border-white/[0.08] rounded-xl p-3.5 hover:border-[#a8e6cf]/40 transition-colors">
+                <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
+                  03 · GATE
+                </span>
+                <b className="text-xs font-bold text-white block mb-1">The gate checks everything</b>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Scoped, short-lived tokens only. Destructive actions are blocked pre-execution.
+                </p>
+              </div>
+
+              <div className="step bg-[#0a0d0c] border border-white/[0.08] rounded-xl p-3.5 hover:border-[#a8e6cf]/40 transition-colors">
+                <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
+                  04 · PR OUT
+                </span>
+                <b className="text-xs font-bold text-white block mb-1">Sandbox, then verified PR</b>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Work runs in a throwaway microVM. Tests pass, PR is opened, sandbox destroyed.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          {/* 4. BUDGET & CIRCUIT BREAKER SECTION */}
+          <section className="budget bg-[#0a0d0c] border border-white/[0.1] rounded-2xl p-5 shadow-xl space-y-4">
+            <div>
+              <div className="text-[11px] font-mono uppercase tracking-wider text-[#a8e6cf] font-bold mb-1">
+                [ 03 · FINANCIAL SAFEGUARDS ]
+              </div>
+              <h2 className="text-lg font-bold text-white tracking-tight">Never a surprise bill</h2>
+              <p className="text-xs text-slate-400">Hard ceilings enforced per task, developer, and repository.</p>
+            </div>
+
+            {/* Progress Bars */}
+            <div className="space-y-3 font-mono text-xs">
+              
+              <div className="brow">
+                <div className="flex justify-between text-slate-300 text-[11px] mb-1">
+                  <span>Per task · issue #402</span>
+                  <span className="text-[#a8e6cf] font-bold">$0.84 / $2.00</span>
+                </div>
+                <div className="track h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="fill h-full bg-gradient-to-r from-[#a8e6cf] to-[#7dd3c0] rounded-full" style={{ width: '42%' }}></div>
+                </div>
+              </div>
+
+              <div className="brow">
+                <div className="flex justify-between text-slate-300 text-[11px] mb-1">
+                  <span>Per developer · this month</span>
+                  <span className="text-[#a8e6cf] font-bold">$61 / $120</span>
+                </div>
+                <div className="track h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="fill h-full bg-gradient-to-r from-[#a8e6cf] to-[#7dd3c0] rounded-full" style={{ width: '51%' }}></div>
+                </div>
+              </div>
+
+              <div className="brow">
+                <div className="flex justify-between text-slate-300 text-[11px] mb-1">
+                  <span>Per repo · web-app</span>
+                  <span className="text-[#a8e6cf] font-bold">$142 / $500</span>
+                </div>
+                <div className="track h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="fill h-full bg-gradient-to-r from-[#a8e6cf] to-[#7dd3c0] rounded-full" style={{ width: '28%' }}></div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Mini Stats Tiles */}
+            <div className="grid grid-cols-2 gap-2.5 pt-1">
+              <div className="tile bg-[#060807] border border-white/[0.08] rounded-xl p-3">
+                <b className="text-xl font-bold text-white block">45</b>
+                <span className="text-[11px] text-slate-400">verified PRs this month</span>
+              </div>
+              <div className="tile bg-[#060807] border border-white/[0.08] rounded-xl p-3">
+                <b className="text-xl font-bold text-[#a8e6cf] block">$3.16</b>
+                <span className="text-[11px] text-slate-400">average cost per PR</span>
+              </div>
+            </div>
+
+            {/* Circuit Breaker Pill */}
+            <div className="breaker border border-dashed border-[#fbbf24]/50 bg-[#fbbf24]/[0.06] rounded-xl p-3 text-xs text-amber-200 leading-snug">
+              <strong className="text-[#fbbf24]">⚡ Circuit breaker:</strong> Same tool error encountered three times; agent execution halted automatically. Approx. $38 saved this week.
+            </div>
+          </section>
+
         </div>
 
       </div>
