@@ -1,192 +1,312 @@
-import React, { useState } from 'react';
-import { 
-  ShieldCheck, 
-  Terminal, 
-  Zap, 
-  ChevronRight, 
-  Copy, 
-  Check, 
-  Cpu, 
-  Layers, 
-  ArrowUpRight,
-  Lock,
-  RotateCcw,
-  Sparkles
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 
-export default function Hero({ onExploreConsole, onOpenVisualizer }) {
+const TASKS = [
+  'refactor billing',
+  'triage tickets',
+  'draft contract',
+  'backtest momentum',
+  'review PR #482',
+  'reconcile q3.xlsx',
+  'migrate schema',
+  'scrape pricing',
+  'eval run 118',
+  'summarize calls',
+  'fix flaky test',
+  'deploy preview'
+];
+
+const STATUS_LABELS = {
+  boot: 'booting',
+  run: 'running',
+  wait: 'needs approval',
+  done: 'done',
+  fail: 'denied'
+};
+
+const RUNTIMES = ['py', 'node', 'sh'];
+const rnd = (a) => a[Math.floor(Math.random() * a.length)];
+
+export default function Hero() {
   const [copied, setCopied] = useState(false);
-  const installCmd = "npx @guild/cli@latest init my-agent-fleet";
+  const heroRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  // Fleet state
+  const [fleet, setFleet] = useState(() =>
+    TASKS.map((t, i) => ({
+      id: 'sbx_' + (1000 + i * 37).toString(16),
+      t,
+      s: rnd(['run', 'run', 'boot', 'done']),
+      runtime: rnd(RUNTIMES),
+      flash: false
+    }))
+  );
+
+  const [logs, setLogs] = useState([
+    { id: 1, text: '<b>sbx_3f8</b> boot 64ms' },
+    { id: 2, text: '<b>sbx_41d</b> tool.call ok' }
+  ]);
+
+  const addLog = (msg) => {
+    setLogs((prev) => [{ id: Date.now() + Math.random(), text: msg }, ...prev.slice(0, 5)]);
+  };
+
+  // Live fleet task transitions
+  useEffect(() => {
+    const nextMap = { boot: 'run', run: null, wait: null, done: 'boot', fail: 'boot' };
+
+    const interval = setInterval(() => {
+      setFleet((currentFleet) => {
+        const randomIndex = Math.floor(Math.random() * currentFleet.length);
+        const item = currentFleet[randomIndex];
+
+        if (item.s === 'wait') return currentFleet;
+
+        let nextStatus = nextMap[item.s];
+        if (item.s === 'run') {
+          nextStatus = Math.random() < 0.35 ? 'wait' : Math.random() < 0.5 ? 'done' : null;
+        }
+
+        if (!nextStatus) return currentFleet;
+
+        const waitingCount = currentFleet.filter((x) => x.s === 'wait').length;
+        if (nextStatus === 'wait' && waitingCount >= 2) return currentFleet;
+
+        const updatedTask = nextStatus === 'boot' ? rnd(TASKS) : item.t;
+
+        const logMsg =
+          nextStatus === 'boot'
+            ? `<b>${item.id}</b> boot 64ms`
+            : nextStatus === 'run'
+            ? `<b>${item.id}</b> tool.call ok`
+            : nextStatus === 'wait'
+            ? `<b>${item.id}</b> paused for approval`
+            : `<b>${item.id}</b> completed`;
+
+        addLog(logMsg);
+
+        return currentFleet.map((f, idx) =>
+          idx === randomIndex
+            ? { ...f, s: nextStatus, t: updatedTask, flash: true }
+            : f
+        );
+      });
+    }, 900);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Clear flash state after animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFleet((current) =>
+        current.some((f) => f.flash)
+          ? current.map((f) => (f.flash ? { ...f, flash: false } : f))
+          : current
+      );
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [fleet]);
+
+  // Handle Approve / Deny action in the queue
+  const handleApproval = (decision) => {
+    const waitingItem = fleet.find((x) => x.s === 'wait');
+    if (!waitingItem) return;
+
+    const newStatus = decision === 'ok' ? 'run' : 'fail';
+    addLog(`<b>${waitingItem.id}</b> ${decision === 'ok' ? 'approved by you' : 'denied by you'}`);
+
+    setFleet((current) =>
+      current.map((f) =>
+        f.id === waitingItem.id
+          ? { ...f, s: newStatus, flash: true }
+          : f
+      )
+    );
+  };
+
+  const runningCount = fleet.filter((f) => f.s === 'run').length;
+  const waitingFleet = fleet.filter((f) => f.s === 'wait');
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(installCmd);
+    navigator.clipboard.writeText('npm i @helm/sdk');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Canvas quiet sandbox grid animation
+  useEffect(() => {
+    const host = heroRef.current;
+    const canvas = canvasRef.current;
+    if (!host || !canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+    const S = 32;
+    let cs = 0;
+    let rw = 0;
+    let energy = new Float32Array(0);
+    let animationId;
+
+    const resize = () => {
+      const r = host.getBoundingClientRect();
+      const d = Math.min(window.devicePixelRatio || 1, 2);
+      width = r.width;
+      height = r.height;
+      canvas.width = r.width * d;
+      canvas.height = r.height * d;
+      ctx.setTransform(d, 0, 0, d, 0, 0);
+
+      cs = Math.ceil(width / S);
+      rw = Math.ceil(height / S);
+      energy = new Float32Array(cs * rw);
+    };
+
+    const ro = new ResizeObserver(resize);
+    ro.observe(host);
+    resize();
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      let col = '176,228,204';
+      try {
+        const csStyle = getComputedStyle(document.documentElement);
+        const hex = csStyle.getPropertyValue('--a').trim();
+        const n = parseInt(hex.replace('#', ''), 16);
+        if (!isNaN(n)) {
+          col = [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(',');
+        }
+      } catch (e) {}
+
+      if (Math.random() < 0.3) {
+        const i = Math.floor(Math.random() * energy.length);
+        if (energy[i] < 0.05) energy[i] = 0.55;
+      }
+
+      for (let j = 0; j < rw; j++) {
+        for (let i = 0; i < cs; i++) {
+          const k = j * cs + i;
+          const v = energy[k];
+          const cx = i * S + S / 2;
+          const cy = j * S + S / 2;
+
+          ctx.fillStyle = `rgba(${col}, .07)`;
+          ctx.fillRect(cx - 1, cy - 1, 2, 2);
+
+          if (v < 0.02) {
+            energy[k] = 0;
+            continue;
+          }
+
+          const z = 2 + v * 4;
+          ctx.fillStyle = `rgba(${col}, ${v * 0.5})`;
+          ctx.fillRect(cx - z / 2, cy - z / 2, z, z);
+          energy[k] = v * 0.965;
+        }
+      }
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
   return (
-    <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-grid-pattern">
-      {/* Dynamic ambient lighting & glow orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-emerald-500/20 via-cyan-500/15 to-indigo-500/20 blur-[130px] -z-10 rounded-full pointer-events-none" />
-      <div className="absolute top-1/3 left-1/4 w-[350px] h-[250px] bg-emerald-500/10 blur-[100px] -z-10 rounded-full pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 w-[350px] h-[250px] bg-cyan-500/10 blur-[100px] -z-10 rounded-full pointer-events-none" />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        
-        {/* Floating pill badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-mono tracking-tight mb-8 backdrop-blur-md shadow-sm">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+    <header className="hero" ref={heroRef}>
+      <canvas
+        ref={canvasRef}
+        className="fx"
+        style={{
+          maskImage: 'linear-gradient(#000 45%, transparent)',
+          WebkitMaskImage: 'linear-gradient(#000 45%, transparent)'
+        }}
+      />
+      <div className="w">
+        <div className="hd">
+          <span className="pill m">
+            <span className="dot"></span>All systems operational · 99.99% uptime
           </span>
-          <span className="font-semibold text-white">Next-Gen Control Plane:</span>
-          <span>Time-Travel State Repair + Adversarial Mesh Consensus</span>
-          <ChevronRight className="w-3.5 h-3.5 text-emerald-400 ml-0.5" />
-        </div>
-
-        {/* Main Headline */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.12]">
-          The Control Plane for{' '}
-          <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-            AI Agents.
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-slate-300 font-normal mb-10 leading-relaxed">
-          Manage, govern, monitor, and scale every autonomous agent in production. 
-          Stop rogue tool calls with <span className="text-emerald-400 font-medium">pre-dispatch interception</span>, 
-          enforce strict token budgets, and <span className="text-cyan-400 font-medium">autonomously rewind bad mutations</span> before they reach enterprise systems.
-        </p>
-
-        {/* Action CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-          
-          <button
-            onClick={onExploreConsole}
-            className="w-full sm:w-auto px-7 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 group"
-          >
-            <span>Launch Live Fleet Console</span>
-            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </button>
-
-          <button
-            onClick={onOpenVisualizer}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-200 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.12] hover:border-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2 group"
-          >
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Test Pre-Dispatch Interceptor</span>
-          </button>
-
-        </div>
-
-        {/* Interactive CLI Install Command Bar */}
-        <div className="max-w-xl mx-auto mb-16">
-          <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#0c0f18]/90 border border-white/[0.1] backdrop-blur-md font-mono text-xs text-slate-300 shadow-2xl group hover:border-emerald-500/30 transition-all">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <Terminal className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-slate-500 select-none">$</span>
-              <span className="text-emerald-300 truncate">{installCmd}</span>
-            </div>
-            <button
-              onClick={handleCopy}
-              className="ml-3 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors shrink-0 flex items-center gap-1.5"
-              title="Copy to clipboard"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-[11px] text-emerald-400 font-sans">Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span className="text-[11px] text-slate-400 font-sans hidden sm:inline">Copy</span>
-                </>
-              )}
-            </button>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-2 font-mono">
-            Model-agnostic &bull; MCP Native &bull; TypeScript &amp; Python SDKs &bull; Open-source core
+          <h1>
+            Every agent gets a machine. <em>You get the controls.</em>
+          </h1>
+          <p className="sub">
+            Isolated runtime, scoped secrets, human approval gates and full traces for every agent you ship — on any model, in our cloud or yours.
           </p>
+          <div className="cta">
+            <a className="btn p" href="#">Start building →</a>
+            <a className="btn" href="#">Book a demo</a>
+            <span className="inst m" id="cp" onClick={handleCopy}>
+              <span>$</span>
+              <span>npm i <b>@helm/sdk</b></span>
+              <span>{copied ? '✓' : '⧉'}</span>
+            </span>
+          </div>
         </div>
 
-        {/* Live Fleet Telemetry Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
-          
-          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md">
-            <div className="text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-              <span>42.8k</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Autonomous Agents Managed</p>
-            <div className="text-[10px] text-emerald-400 font-mono mt-2 flex items-center gap-1">
-              <span>↑ +28% this month</span>
-            </div>
+        {/* Live Fleet Console */}
+        <div className="console">
+          <div className="ch m">
+            <b>fleet · prod-us-east</b>
+            <span className="sp">
+              <span>running <b id="nr">{runningCount}</b></span>
+              <span>awaiting approval <b id="nw">{waitingFleet.length}</b></span>
+              <span>p50 boot <b>64ms</b></span>
+            </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md">
-            <div className="text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
-              <span>0.8</span>
-              <span className="text-emerald-400 text-lg font-mono">ms</span>
+          <div className="cb">
+            {/* Grid of 12 Sandboxes */}
+            <div className="fleet" id="fleet">
+              {fleet.map((item) => (
+                <div key={item.id} className={`t m ${item.flash ? 'flash' : ''}`}>
+                  <div className="id">
+                    <span>{item.id}</span>
+                    <span>{item.runtime}</span>
+                  </div>
+                  <div className="tk">{item.t}</div>
+                  <span className={`st s-${item.s}`}>
+                    {STATUS_LABELS[item.s]}
+                  </span>
+                </div>
+              ))}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Pre-Dispatch Policy Intercept</p>
-            <div className="text-[10px] text-cyan-400 font-mono mt-2 flex items-center gap-1">
-              <span>Zero measurable runtime lag</span>
-            </div>
-          </div>
 
-          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md">
-            <div className="text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1">
-              <span>100%</span>
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Destructive Call Containment</p>
-            <div className="text-[10px] text-emerald-400 font-mono mt-2 flex items-center gap-1">
-              <span>0 prod breaches reported</span>
-            </div>
-          </div>
+            {/* Side: Approval queue + Live Trace */}
+            <div className="side">
+              <h5>Approval queue</h5>
+              <div className="apr" id="apr">
+                {waitingFleet.length > 0 ? (
+                  <div className="ap m">
+                    <div><b>{waitingFleet[0].id}</b> wants to run</div>
+                    <div className="k">github.merge_pull_request</div>
+                    <div className="r">
+                      <button className="btn p" onClick={() => handleApproval('ok')}>Approve</button>
+                      <button className="btn" onClick={() => handleApproval('no')}>Deny</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="none">No pending requests.</div>
+                )}
+              </div>
 
-          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md">
-            <div className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-              <span>$4.2M</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Enterprise Token Spend Guarded</p>
-            <div className="text-[10px] text-indigo-400 font-mono mt-2 flex items-center gap-1">
-              <span>Throttled runaway loops</span>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Framework & Model Agnostic Ecosystem bar */}
-        <div className="mt-16 pt-8 border-t border-white/[0.06]">
-          <p className="text-xs font-mono uppercase tracking-wider text-slate-500 mb-6">
-            Vendor-neutral control plane compatible across models &amp; agent frameworks
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-slate-400 text-xs sm:text-sm font-semibold tracking-wide">
-            <div className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="w-2 h-2 rounded-full bg-orange-400"></span> Claude 3.5 Sonnet
-            </div>
-            <div className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span> OpenAI GPT-4o
-            </div>
-            <div className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="w-2 h-2 rounded-full bg-blue-400"></span> Google Gemini 1.5
-            </div>
-            <div className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="w-2 h-2 rounded-full bg-indigo-400"></span> LangChain &amp; LangGraph
-            </div>
-            <div className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="w-2 h-2 rounded-full bg-purple-400"></span> CrewAI &amp; AutoGen
-            </div>
-            <div className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="w-2 h-2 rounded-full bg-cyan-400"></span> Model Context Protocol (MCP)
+              <h5 style={{ borderTop: '1px solid var(--line)' }}>Live trace</h5>
+              <div className="log m" id="log">
+                {logs.map((item) => (
+                  <div key={item.id} dangerouslySetInnerHTML={{ __html: item.text }} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
       </div>
-    </section>
+    </header>
   );
 }
