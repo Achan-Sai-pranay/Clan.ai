@@ -234,10 +234,10 @@ export default function Hero() {
             <span className="dot"></span>Enterprise AI Control Plane · Sovereign & SOC 2 Ready
           </span>
           <h1>
-            Models and agents are disposable. <em>Our infrastructure is the permanent control layer.</em>
+            Let agents ship. <em>Keep the keys.</em>
           </h1>
           <p className="sub">
-            The infrastructure and governance operating system for enterprise AI software development. Spin up ephemeral sandboxes in &lt;3s, enforce least-privilege IAM and pre-dispatch command filters, eliminate run-away token bills, and hot-swap failing models across your entire fleet.
+            Clan runs every AI coding agent in an isolated sandbox, blocks dangerous commands before they execute, and caps what they can spend, in your cloud or ours.
           </p>
           <div className="cta">
             <a className="btn p" href="#arch">Explore Control Plane →</a>
