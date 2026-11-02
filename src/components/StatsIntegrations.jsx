@@ -74,7 +74,7 @@ export default function StatsIntegrations() {
           </div>
           <div>
             <b data-n="99.99" data-s="%">99.99%</b>
-            <span>Enterprise SLA (SOC 2 ready)</span>
+            <span>Enterprise Uptime SLA</span>
           </div>
         </div>
 

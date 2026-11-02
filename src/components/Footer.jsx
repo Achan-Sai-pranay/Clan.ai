@@ -42,7 +42,7 @@ export default function Footer() {
           <div>
             <h4>Trust & Security</h4>
             <ul>
-              <li><a href="#">SOC 2 Compliance</a></li>
+              <li><a href="#">Security & Compliance</a></li>
               <li><a href="#">Air-Gapped Deployment</a></li>
               <li><a href="#">Least-Privilege RBAC</a></li>
             </ul>

@@ -231,17 +231,18 @@ export default function Hero() {
       <div className="w">
         <div className="hd">
           <span className="pill m">
-            <span className="dot"></span>Enterprise AI Control Plane · Sovereign & SOC 2 Ready
+            <span className="dot"></span>Enterprise Control Plane · Ephemeral Sandboxes
           </span>
           <h1>
-            Let agents ship. <em>Keep the keys.</em>
+            Let agents ship.<br />
+            <em>Keep the keys.</em>
           </h1>
           <p className="sub">
             Clan runs every AI coding agent in an isolated sandbox, blocks dangerous commands before they execute, and caps what they can spend, in your cloud or ours.
           </p>
           <div className="cta">
             <a className="btn p" href="#arch">Explore Control Plane →</a>
-            <a className="btn" href="#differentiators">Why We Differentiate</a>
+            <a className="btn" href="#arch">See how it works</a>
             <span className="inst m" id="cp" onClick={handleCopy}>
               <span>$</span>
               <span>pip install <b>clan-sdk</b></span>

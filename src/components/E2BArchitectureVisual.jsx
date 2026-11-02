@@ -13,7 +13,7 @@ export default function E2BArchitectureVisual() {
   const svgRef = useRef(null);
 
   // 3D Engine State
-  const [explodeGap, setExplodeGap] = useState(88); // 55 to 115
+  const [explodeGap, setExplodeGap] = useState(94); // 65 to 125
   const [hoveredLayer, setHoveredLayer] = useState(-1);
   const [tiltTarget, setTiltTarget] = useState(0);
 
@@ -21,7 +21,7 @@ export default function E2BArchitectureVisual() {
   const stateRef = useRef({
     th: 0,
     tt: 0,
-    g: 88,
+    g: 94,
     hl: -1,
   });
 
@@ -328,9 +328,7 @@ export default function E2BArchitectureVisual() {
             th
           );
           const sx = -s2 + S[k] * ((t / 2600) % 1);
-          l +=
-            ln(sx, -s2, sx, s2, z + 3, 'rgba(240,250,246,.8)', 2, th) +
-            tag(-60, 105, z + 10, 'SCOPED TOKENS · RBAC · PRE-DISPATCH', '#e4f3ec', 8.5, 700, th);
+          l += ln(sx, -s2, sx, s2, z + 3, 'rgba(240,250,246,.8)', 2, th);
           if (hold) {
             const r = 20 + 8 * Math.sin(t / 120);
             const q = [
@@ -349,18 +347,18 @@ export default function E2BArchitectureVisual() {
         if (k === 4) {
           l += box(-s2, -s2, z, S[k], S[k], 3, [226, 232, 240], [226, 232, 240], 0.07, st, on ? 1.6 : 1, '4 5', th);
           const ag = [
-            [-85, -50, 'Claude'],
-            [-35, 70, 'Gemini'],
-            [25, -80, 'GPT'],
-            [60, 35, 'Llama'],
-            [95, -15, 'Claude']
+            [-85, -55, 'Claude 3.5'],
+            [-15, 65, 'Gemini Pro'],
+            [45, -75, 'GPT-4o'],
+            [85, 25, 'Llama 3']
           ].sort((a, b) => D(a[0], a[1], th) - D(b[0], b[1], th));
           ag.forEach(([x, y, n]) => {
-            const bad = n === 'Gemini' && t % 9000 < 3500;
+            const bad = n === 'Gemini Pro' && t % 9000 < 3500;
             const zz = z + 14 + 5 * Math.sin(t / 700 + x);
+            const labelText = bad ? 'Swap: Claude' : n;
             l +=
               cube(x, y, zz, 30, 26, bad ? RED : [226, 232, 240], bad ? RED.map((v) => v * 0.5) : [100, 116, 139]) +
-              tag(x, y, zz + 38, bad ? 'Gemini ✕ → Claude' : n, bad ? '#fb7185' : '#cbd5e1', 9, 600, th);
+              tag(x, y, zz + 36, labelText, bad ? '#fb7185' : '#cbd5e1', 8.5, 600, th);
           });
         }
 
@@ -387,18 +385,39 @@ export default function E2BArchitectureVisual() {
         labels.push([k, best, on]);
       }
 
-      // Connecting lines to right labels inside SVG
+      // Connecting lines to right labels inside SVG with collision prevention
+      const labelY = {};
+      labels.forEach(([k, b]) => {
+        labelY[k] = b[1];
+      });
+
+      // Enforce top-to-bottom minimum separation of 50px so layers never collide
+      const order = [4, 3, 2, 1, 0];
+      for (let i = 1; i < order.length; i++) {
+        const prevK = order[i - 1];
+        const currK = order[i];
+        if (labelY[currK] < labelY[prevK] + 50) {
+          labelY[currK] = labelY[prevK] + 50;
+        }
+      }
+
       labels.forEach(([k, b, on]) => {
-        const y = b[1].toFixed(1);
-        o += `<g data-i="${k}" style="cursor:pointer"><line x1="${(b[0] + 8).toFixed(1)}" y1="${y}" x2="630" y2="${y}" stroke="${
+        const y = labelY[k];
+        const rawY = b[1];
+        const isBent = Math.abs(y - rawY) > 2;
+        const linePath = isBent
+          ? `M ${(b[0] + 8).toFixed(1)} ${rawY.toFixed(1)} L 610 ${y.toFixed(1)} L 630 ${y.toFixed(1)}`
+          : `M ${(b[0] + 8).toFixed(1)} ${rawY.toFixed(1)} L 630 ${y.toFixed(1)}`;
+
+        o += `<g data-i="${k}" style="cursor:pointer"><path d="${linePath}" fill="none" stroke="${
           on ? '#b5ecd4' : 'rgba(255,255,255,.24)'
-        }" stroke-dasharray="3 4"/><circle cx="${b[0].toFixed(1)}" cy="${y}" r="3.5" fill="${
+        }" stroke-dasharray="3 4"/><circle cx="${b[0].toFixed(1)}" cy="${rawY.toFixed(1)}" r="3.5" fill="${
           on ? '#b5ecd4' : '#9fb3ac'
-        }"/><text x="640" y="${(b[1] - 3).toFixed(1)}" fill="${
+        }"/><text x="640" y="${(y - 3).toFixed(1)}" fill="${
           on ? '#b5ecd4' : '#e8f1ee'
         }" font-size="11" font-weight="700" letter-spacing="0.8" font-family="'JetBrains Mono', monospace">${
           meta[k][0]
-        }</text><text x="640" y="${(b[1] + 12).toFixed(1)}" fill="#8aa099" font-size="10" font-family="'JetBrains Mono', monospace">${
+        }</text><text x="640" y="${(y + 12).toFixed(1)}" fill="#8aa099" font-size="10" font-family="'JetBrains Mono', monospace">${
           meta[k][1]
         }</text></g>`;
       });
@@ -448,7 +467,7 @@ export default function E2BArchitectureVisual() {
       id: 2,
       name: '02 · CONTROL PLANE',
       sub: 'Token budgeting · Circuit breaker · Full audit trail',
-      desc: 'Enforces hard token & compute caps per repository and per developer. Halts executions when identical tool errors repeat 3 times, logging every prompt, bash command, and file diff into SOC 2 audit logs.'
+      desc: 'Enforces hard token & compute caps per repository and per developer. Halts executions when identical tool errors repeat 3 times, logging every prompt, bash command, and file diff into immutable audit logs.'
     },
     {
       id: 1,
@@ -500,8 +519,8 @@ export default function E2BArchitectureVisual() {
                 <span className="text-slate-300 font-semibold">Explode 3D:</span>
                 <input
                   type="range"
-                  min="55"
-                  max="115"
+                  min="65"
+                  max="125"
                   value={explodeGap}
                   onChange={(e) => setExplodeGap(+e.target.value)}
                   className="accent-[#a8e6cf] w-28 cursor-pointer"

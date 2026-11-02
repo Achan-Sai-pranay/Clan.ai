@@ -323,9 +323,9 @@ section, footer, .logos, .bar {
 }
 
 h1 {
-  font-size: clamp(40px, 6.4vw, 72px);
-  line-height: 1.04;
-  letter-spacing: -.04em;
+  font-size: clamp(34px, 5.2vw, 62px);
+  line-height: 1.08;
+  letter-spacing: -.035em;
   font-weight: 700;
   margin: 22px 0 20px;
 }

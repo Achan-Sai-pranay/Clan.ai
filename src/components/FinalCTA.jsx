@@ -8,7 +8,7 @@ const LOGS = [
   'hot-swap fallback -> Claude 3.5',
   'human approval: slack #eng-leads',
   'sister sandbox test pass',
-  'soc2 audit hash signed',
+  'audit hash SHA-256 signed',
   'unapproved egress blocked',
   'agent.emit clean PR #402',
   'sandbox auto-destroyed',
@@ -103,7 +103,7 @@ export default function FinalCTA() {
           <span className="ey">Deploy the Control Plane</span>
           <h2>Models and agents are disposable. Your control layer is permanent.</h2>
           <p className="ld" style={{ margin: '0 auto' }}>
-            Available for on-premise private VPC, sovereign regions, and enterprise air-gapped clusters. SOC 2 and ISO compliance ready.
+            Available for on-premise private VPC, sovereign regions, and enterprise air-gapped clusters. Built for zero data leakage.
           </p>
           <div className="cta">
             <a className="btn p" href="#">Book Technical Demo →</a>

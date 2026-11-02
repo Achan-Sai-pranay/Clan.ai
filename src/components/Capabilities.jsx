@@ -142,7 +142,7 @@ export default function Capabilities() {
                 />
               </svg>
               <div className="m">
-                audit stream <span className="k" id="cpu">SOC 2 / ISO</span> · SHA-256 verified
+                audit stream <span className="k" id="cpu">IMMUTABLE</span> · SHA-256 verified
               </div>
             </div>
             <h3>4. Centralized Observability & Audit Trail</h3>
