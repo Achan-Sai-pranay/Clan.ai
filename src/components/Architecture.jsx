@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import E2BArchitectureVisual from './E2BArchitectureVisual';
 
 export default function Architecture() {
   const wrapRef = useRef(null);
@@ -173,6 +174,9 @@ export default function Architecture() {
           Bring any model, framework or harness. Helm runs the machine underneath and enforces policy on everything that crosses it.
         </p>
 
+        {/* Exact 3D Isometric Exploded Architectural Stack from E2B */}
+        <E2BArchitectureVisual />
+
         <div className="archwrap" id="archwrap" ref={wrapRef}>
           <canvas
             ref={canvasRef}
@@ -225,3 +229,4 @@ export default function Architecture() {
     </section>
   );
 }
+
