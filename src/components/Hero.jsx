@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 const TASKS = [
-  'refactor billing',
-  'triage tickets',
-  'draft contract',
-  'backtest momentum',
+  'fix issue #402',
+  'patch CVE-2024-81',
+  'migrate postgres schema',
+  'run sister test suite',
+  'refactor billing auth',
   'review PR #482',
-  'reconcile q3.xlsx',
-  'migrate schema',
-  'scrape pricing',
-  'eval run 118',
-  'summarize calls',
-  'fix flaky test',
-  'deploy preview'
+  'sanitize shell command',
+  'hot-swap to Claude 3.5',
+  'intercept rm -rf /prod',
+  'enforce $5 budget cap',
+  'pause for human approval',
+  'auto-verify PR branch'
 ];
 
 const STATUS_LABELS = {
@@ -43,8 +43,8 @@ export default function Hero() {
   );
 
   const [logs, setLogs] = useState([
-    { id: 1, text: '<b>sbx_3f8</b> boot 64ms' },
-    { id: 2, text: '<b>sbx_41d</b> tool.call ok' }
+    { id: 1, text: '<b>sbx_3f8</b> boot &lt;3s · microVM isolated' },
+    { id: 2, text: '<b>sbx_41d</b> pre-dispatch: blocked destructive rm -rf' }
   ]);
 
   const addLog = (msg) => {
@@ -76,12 +76,12 @@ export default function Hero() {
 
         const logMsg =
           nextStatus === 'boot'
-            ? `<b>${item.id}</b> boot 64ms`
+            ? `<b>${item.id}</b> sandbox boot &lt;3s`
             : nextStatus === 'run'
-            ? `<b>${item.id}</b> tool.call ok`
+            ? `<b>${item.id}</b> pre-dispatch check passed`
             : nextStatus === 'wait'
-            ? `<b>${item.id}</b> paused for approval`
-            : `<b>${item.id}</b> completed`;
+            ? `<b>${item.id}</b> paused for human lead approval`
+            : `<b>${item.id}</b> verified PR emitted`;
 
         addLog(logMsg);
 
@@ -129,7 +129,7 @@ export default function Hero() {
   const waitingFleet = fleet.filter((f) => f.s === 'wait');
 
   const handleCopy = () => {
-    navigator.clipboard.writeText('npm i @helm/sdk');
+    navigator.clipboard.writeText('pip install clan-sdk');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -231,20 +231,20 @@ export default function Hero() {
       <div className="w">
         <div className="hd">
           <span className="pill m">
-            <span className="dot"></span>All systems operational · 99.99% uptime
+            <span className="dot"></span>Enterprise AI Control Plane · Sovereign & SOC 2 Ready
           </span>
           <h1>
-            Every agent gets a machine. <em>You get the controls.</em>
+            Models and agents are disposable. <em>Our infrastructure is the permanent control layer.</em>
           </h1>
           <p className="sub">
-            Isolated runtime, scoped secrets, human approval gates and full traces for every agent you ship — on any model, in our cloud or yours.
+            The infrastructure and governance operating system for enterprise AI software development. Spin up ephemeral sandboxes in &lt;3s, enforce least-privilege IAM and pre-dispatch command filters, eliminate run-away token bills, and hot-swap failing models across your entire fleet.
           </p>
           <div className="cta">
-            <a className="btn p" href="#">Start building →</a>
-            <a className="btn" href="#">Book a demo</a>
+            <a className="btn p" href="#arch">Explore Control Plane →</a>
+            <a className="btn" href="#differentiators">Why We Differentiate</a>
             <span className="inst m" id="cp" onClick={handleCopy}>
               <span>$</span>
-              <span>npm i <b>@helm/sdk</b></span>
+              <span>pip install <b>clan-sdk</b></span>
               <span>{copied ? '✓' : '⧉'}</span>
             </span>
           </div>
@@ -253,11 +253,11 @@ export default function Hero() {
         {/* Live Fleet Console */}
         <div className="console">
           <div className="ch m">
-            <b>fleet · prod-us-east</b>
+            <b>fleet · private-vpc · us-east</b>
             <span className="sp">
-              <span>running <b id="nr">{runningCount}</b></span>
-              <span>awaiting approval <b id="nw">{waitingFleet.length}</b></span>
-              <span>p50 boot <b>64ms</b></span>
+              <span>active sandboxes <b id="nr">{runningCount}</b></span>
+              <span>human approvals <b id="nw">{waitingFleet.length}</b></span>
+              <span>boot time <b>&lt;3s</b></span>
             </span>
           </div>
 
@@ -280,19 +280,19 @@ export default function Hero() {
 
             {/* Side: Approval queue + Live Trace */}
             <div className="side">
-              <h5>Approval queue</h5>
+              <h5>Approval queue (Human-in-the-loop)</h5>
               <div className="apr" id="apr">
                 {waitingFleet.length > 0 ? (
                   <div className="ap m">
-                    <div><b>{waitingFleet[0].id}</b> wants to run</div>
-                    <div className="k">github.merge_pull_request</div>
+                    <div><b>{waitingFleet[0].id}</b> paused for escalation</div>
+                    <div className="k">schema.alter_column --force</div>
                     <div className="r">
                       <button className="btn p" onClick={() => handleApproval('ok')}>Approve</button>
                       <button className="btn" onClick={() => handleApproval('no')}>Deny</button>
                     </div>
                   </div>
                 ) : (
-                  <div className="none">No pending requests.</div>
+                  <div className="none">No pending escalation requests.</div>
                 )}
               </div>
 

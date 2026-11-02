@@ -2,33 +2,36 @@ import React from 'react';
 
 export default function Differentiators() {
   return (
-    <section className="alt">
+    <section id="differentiators" className="alt">
       <div className="w rv">
-        <span className="ey">Your differentiators</span>
-        <h2>What Helm does that the others don’t.</h2>
+        <span className="ey">Strategic Differentiators</span>
+        <h2>Why Enterprises Choose Our Control Plane Over Fragile Coding Bots</h2>
 
         <div className="grid g3">
           {/* Differentiator 1 */}
           <div className="card">
-            <h3>Autonomous Time-Travel State Repair</h3>
+            <div className="text-xs font-mono text-[#a8e6cf] mb-2 font-bold">[ 01 · SOVEREIGN DEPLOYMENT ]</div>
+            <h3>Self-Hosted & Sovereign Cloud</h3>
             <p>
-              When an agent hallucinates mid-workflow, our two-phase compensating ledger safely rewinds database mutations, cloud assets, and API writes back to Step 0 with zero corrupted state.
+              Global and regional enterprises (banks, insurance, defense, GCCs) cannot send proprietary code to foreign third-party clouds. We offer On-Premise and Private VPC deployments running on local AWS/Azure/GCP regions or fully air-gapped servers with open-source models.
             </p>
           </div>
 
           {/* Differentiator 2 */}
           <div className="card">
-            <h3>Cross-Agent Adversarial Consensus Mesh</h3>
+            <div className="text-xs font-mono text-[#a8e6cf] mb-2 font-bold">[ 02 · NATIVE VERIFICATION ]</div>
+            <h3>Automated CI/CD Native Verification</h3>
             <p>
-              High-privilege tool invocations (DDL writes, payment dispatch, IAM edits) require a zero-latency shadow quorum across heterogeneous models before cryptographic execution tokens are signed.
+              Instead of dumping unverified code on engineers, our platform executes your existing test suite inside an isolated sister sandbox—automatically generating video and log proofs that all unit, lint, and regression tests passed before human review.
             </p>
           </div>
 
           {/* Differentiator 3 */}
           <div className="card">
-            <h3>Sub-Millisecond Pre-Dispatch Interception</h3>
+            <div className="text-xs font-mono text-[#a8e6cf] mb-2 font-bold">[ 03 · HUMAN-IN-THE-LOOP ]</div>
+            <h3>Human-in-the-Loop Escalation</h3>
             <p>
-              Unlike traditional logging platforms that audit actions after the disaster has already happened, Helm halts unauthorized tool calls in 0.8ms pre-execution with strict unit-economic budget killswitches.
+              When an agent encounters ambiguous architectural choices (e.g., PostgreSQL enum vs text column), rather than hallucinating or failing, it pauses sandbox execution and pings the engineering lead via Slack or Microsoft Teams. Execution resumes only upon response.
             </p>
           </div>
         </div>

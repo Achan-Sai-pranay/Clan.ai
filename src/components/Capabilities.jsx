@@ -1,20 +1,43 @@
 import React, { useState, useEffect } from 'react';
 
 const EXEC_LINES = [
-  '$ python analyze.py sales.csv',
-  '✓ loaded 8,412 rows',
-  '✓ wrote report.pdf'
+  '$ git clone repo.git sandbox (<3s)',
+  '✓ isolated microVM bubble active',
+  '✓ test suite passed (42/42)',
+  '✓ emitted clean PR #402 · sandbox auto-destroyed'
 ];
 
-const LIFECYCLE_STATES = ['RUN', 'PAUSE', 'UNBILLED', 'RESUME', 'SNAPSHOT', 'FORK ×12'];
+const AGENT_SKILLS = [
+  'DB Migration Agent',
+  'CVE Patching Agent',
+  'Schema Refactor Agent',
+  'Flaky Test Resolver',
+  'API Sync Agent'
+];
+
+const SWAP_MODELS = [
+  { name: 'Claude 3.5 Sonnet', status: 'Active (Fast)' },
+  { name: 'Gemini 1.5 Pro', status: 'Fallback Ready' },
+  { name: 'GPT-4o', status: 'Standby' },
+  { name: 'vLLM / Local Weights', status: 'Air-gapped' }
+];
 
 export default function Capabilities() {
   // Demo 1: Execution terminal step-by-step typing
   const [execStep, setExecStep] = useState(1);
   useEffect(() => {
     const interval = setInterval(() => {
-      setExecStep((prev) => (prev + 1) % 4);
-    }, 900);
+      setExecStep((prev) => (prev + 1) % (EXEC_LINES.length + 1));
+    }, 1100);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Demo 3: Live Model Swapper
+  const [activeModelIdx, setActiveModelIdx] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveModelIdx((prev) => (prev + 1) % SWAP_MODELS.length);
+    }, 1800);
     return () => clearInterval(interval);
   }, []);
 
@@ -22,7 +45,7 @@ export default function Capabilities() {
   const [sparkPoints, setSparkPoints] = useState(() =>
     Array.from({ length: 30 }, () => 30 + Math.random() * 20)
   );
-  const [cpuUsage, setCpuUsage] = useState(71);
+  const [cpuUsage, setCpuUsage] = useState(58);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,21 +59,21 @@ export default function Capabilities() {
     return () => clearInterval(interval);
   }, []);
 
-  // Demo 5: Secrets vault toggle
-  const [secretMask, setSecretMask] = useState(0);
+  // Demo 5: Budget / Circuit Breaker State
+  const [breakerActive, setBreakerActive] = useState(false);
   useEffect(() => {
     const interval = setInterval(() => {
-      setSecretMask((prev) => prev ^ 1);
-    }, 1400);
+      setBreakerActive((prev) => !prev);
+    }, 2200);
     return () => clearInterval(interval);
   }, []);
 
-  // Demo 6: Lifecycle active pill
-  const [activeLifecycleIndex, setActiveLifecycleIndex] = useState(0);
+  // Demo 6: Internal Agent Hub Active Pill
+  const [activeSkillIndex, setActiveSkillIndex] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveLifecycleIndex((prev) => (prev + 1) % LIFECYCLE_STATES.length);
-    }, 900);
+      setActiveSkillIndex((prev) => (prev + 1) % AGENT_SKILLS.length);
+    }, 1200);
     return () => clearInterval(interval);
   }, []);
 
@@ -61,11 +84,11 @@ export default function Capabilities() {
   return (
     <section id="machine" className="alt">
       <div className="w rv">
-        <span className="ey">Capabilities</span>
-        <h2>Everything an agent needs, nothing it can abuse.</h2>
+        <span className="ey">Core Platform Features</span>
+        <h2>The 6 Pillars of the Enterprise Control Plane</h2>
 
         <div className="grid g3">
-          {/* Card 1: Execution */}
+          {/* Feature 1: Ephemeral Sandboxed Workspaces */}
           <div className="card">
             <div className="demo m" id="d-exec">
               {EXEC_LINES.slice(0, execStep || 1).map((line, i) => (
@@ -75,36 +98,38 @@ export default function Capabilities() {
               ))}
               <div>▍</div>
             </div>
-            <h3>Execution</h3>
-            <p>Commands, code, a PTY or a full desktop in an isolated machine.</p>
+            <h3>1. Ephemeral Sandboxed Workspaces</h3>
+            <p>Spins up isolated microVMs in &lt;3s. Clones repo, runs linters and test suites inside an isolated bubble, emits clean PRs, and auto-destroys with zero leaked state.</p>
           </div>
 
-          {/* Card 2: Network */}
+          {/* Feature 2: Agent IAM & Least-Privilege Security */}
           <div className="card">
             <div className="demo m">
-              <div><span className="g">allow</span> api.openai.com</div>
-              <div><span className="g">allow</span> api.github.com</div>
-              <div><span className="g">allow</span> *.internal.corp:443</div>
-              <div><span className="r">deny&nbsp;</span> 0.0.0.0/0</div>
+              <div><span className="g">proxy</span> scoped-token injected</div>
+              <div><span className="g">rbac&nbsp;</span> junior agent: read-only staging</div>
+              <div><span className="r">deny&nbsp;</span> rm -rf /prod/db (blocked)</div>
+              <div><span className="r">deny&nbsp;</span> unauthorized egress to external IP</div>
             </div>
-            <h3>Network</h3>
-            <p>Ingress and egress under your policy, never around it.</p>
+            <h3>2. Agent IAM & Least-Privilege Security</h3>
+            <p>Treats agents like digital employees. Scoped proxy secrets, RBAC, and pre-dispatch command filters that halt destructive shell actions instantly.</p>
           </div>
 
-          {/* Card 3: Storage */}
+          {/* Feature 3: Swappable Agent Engine */}
           <div className="card">
             <div className="demo m">
-              <div>/home/user</div>
-              <div>&nbsp;├ app/</div>
-              <div>&nbsp;├ data/sales.csv</div>
-              <div>&nbsp;├ <span className="g">report.pdf</span> · written 2s ago</div>
-              <div>&nbsp;└ mnt/s3://acme-data</div>
+              <div className="c mb-1">Decoupled model orchestrator:</div>
+              {SWAP_MODELS.map((m, idx) => (
+                <div key={m.name} className={idx === activeModelIdx ? 'g font-bold' : 'text-slate-400'}>
+                  {idx === activeModelIdx ? '▶ ' : '  '}{m.name} · <span className="text-[10px]">{m.status}</span>
+                </div>
+              ))}
+              <div className="c mt-1 text-[10px]">auto-swap if agent loops or fails tests twice</div>
             </div>
-            <h3>Storage</h3>
-            <p>A persistent filesystem plus your own buckets.</p>
+            <h3>3. Swappable Agent Engine</h3>
+            <p>Decouple agent prompts from underlying models. Hot-swap failing agents across OpenAI, Anthropic, Gemini, or local vLLM/Ollama without rewriting code.</p>
           </div>
 
-          {/* Card 4: Observability */}
+          {/* Feature 4: Centralized Observability & Audit Trail */}
           <div className="card">
             <div className="demo">
               <svg className="spk" viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -117,47 +142,43 @@ export default function Capabilities() {
                 />
               </svg>
               <div className="m">
-                cpu <span className="k" id="cpu">{cpuUsage}%</span> · mem 1.2 GiB
+                audit stream <span className="k" id="cpu">SOC 2 / ISO</span> · SHA-256 verified
               </div>
             </div>
-            <h3>Observability</h3>
-            <p>Metrics, logs, and signed webhooks for every session.</p>
+            <h3>4. Centralized Observability & Audit Trail</h3>
+            <p>Every single prompt, LLM response, tool invocation, bash command, and file diff is cryptographically timestamped for compliance and zero code exfiltration proof.</p>
           </div>
 
-          {/* Card 5: Secrets vault */}
+          {/* Feature 5: Financial Governance & Token Budgeting */}
           <div className="card">
             <div className="demo m">
-              <div>agent&nbsp;&nbsp;› Authorization: <span id="sk1">$STRIPE_KEY</span></div>
-              <div>
-                egress › Authorization:{' '}
-                <span className="g" id="sk2">
-                  {secretMask ? 'sk_live_••••••••' : 'sk_live_51Nz••••'}
-                </span>
+              <div>hard_cap  › <span className="g">$2.00 per task limit</span></div>
+              <div>team_cost › <span className="g">Frontend: $240 / 45 PRs</span></div>
+              <div className={breakerActive ? 'r font-bold' : ''}>
+                circuit_breaker › {breakerActive ? 'HALTED (error loop ×3)' : 'Monitoring loops (0/3)'}
               </div>
-              <div className="c" style={{ marginTop: '6px' }}>
-                value never enters the sandbox
-              </div>
+              <div className="c mt-1 text-[10px]">zero runaway $10,000 monthly invoices</div>
             </div>
-            <h3>Secrets vault</h3>
-            <p>Keys an agent can use but never read.</p>
+            <h3>5. Financial Governance & Token Budgeting</h3>
+            <p>Strict token and dollar ceilings per repo, developer, and task. Circuit breakers halt executions when an agent encounters the same tool error 3 times.</p>
           </div>
 
-          {/* Card 6: Lifecycle */}
+          {/* Feature 6: Internal Agent Hub & Managed Skills Center */}
           <div className="card">
             <div className="demo">
               <div className="pls" id="lc">
-                {LIFECYCLE_STATES.map((state, idx) => (
+                {AGENT_SKILLS.map((skill, idx) => (
                   <span
-                    key={state}
-                    className={idx === activeLifecycleIndex ? 'on' : ''}
+                    key={skill}
+                    className={idx === activeSkillIndex ? 'on' : ''}
                   >
-                    {state}
+                    {skill}
                   </span>
                 ))}
               </div>
             </div>
-            <h3>Lifecycle</h3>
-            <p>Pause, resume, snapshot and fork. Paused sandboxes aren’t billed.</p>
+            <h3>6. Internal Agent Hub & Skills Center</h3>
+            <p>An internal enterprise app store. Senior engineers package DB migration or security patching agents once; any engineer across the firm deploys with 1-click.</p>
           </div>
 
         </div>

@@ -19,19 +19,19 @@ export default function Navbar() {
   return (
     <>
       <div className="bar">
-        <b>New</b> · Bring-your-own-cloud is generally available →
+        <b>Sovereign & On-Premises</b> · Private VPC deployment for global & regional enterprises is generally available →
       </div>
       <nav>
         <div className="w">
           <a className="logo" href="#">
-            <i></i>Helm
+            <i></i>Clan
           </a>
           <ul>
-            <li><a href="#arch">Platform</a></li>
-            <li><a href="#machine">Capabilities</a></li>
+            <li><a href="#arch">Architecture</a></li>
+            <li><a href="#machine">Platform Features</a></li>
+            <li><a href="#differentiators">Differentiators</a></li>
             <li><a href="#dev">Developers</a></li>
             <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#">Docs</a></li>
           </ul>
           <button 
             className="btn ic" 

@@ -6,11 +6,11 @@ export default function Architecture() {
     <section id="arch" className="relative py-20 border-t border-white/[0.08] overflow-visible">
       <div className="w">
         <div className="max-w-3xl mb-8">
-          <span className="ey">Where Helm fits</span>
-          <h2>Every agent governed. You get the controls.</h2>
+          <span className="ey">Control Plane Architecture</span>
+          <h2>The permanent governance layer between your code and AI agents.</h2>
           <p className="ld">
-            Companies can’t trust AI agents in production: no guardrails, surprise bills, no audit trail. 
-            Helm sits between your agents and your systems, and every task flows top to bottom through it.
+            Companies cannot safely run autonomous agents in production without security guardrails, cost controls, and audit trails. 
+            Our platform sits between your systems and agent models—isolating code execution in ephemeral microVMs, enforcing least-privilege IAM, and hot-swapping failing models transparently.
           </p>
         </div>
 

@@ -435,32 +435,32 @@ export default function E2BArchitectureVisual() {
     {
       id: 4,
       name: '04 · AGENT FLEET',
-      sub: 'Any model, hot-swappable',
-      desc: 'Coding agents running on Claude 3.5, GPT-4o, Gemini 1.5 or local models. If a model hallucinates, the control layer hot-swaps it transparently.'
+      sub: 'Model-agnostic · Hot-swappable on failure',
+      desc: 'Decoupled agent runtime across Claude, GPT-4o, Gemini, or local open-source models (vLLM/Ollama). If an agent gets stuck in a loop or fails tests twice, our orchestrator hot-swaps to a more capable model without rewriting prompts.'
     },
     {
       id: 3,
       name: '03 · POLICY & IAM GATE',
-      sub: 'Scoped secrets · RBAC · Pre-dispatch intercept',
-      desc: 'Our Pre-Dispatch Policy Interceptor checks every tool invocation before execution. Destructive shell commands (rm -rf /prod/db) are halted in 0.6ms.'
+      sub: 'The Bouncer · Scoped secrets · Pre-dispatch filter',
+      desc: 'Treats agents like digital employees with access badges. Injects scoped temporary tokens via proxy and intercepts dangerous shell commands (rm -rf, DROP TABLE, data exfiltration) pre-dispatch before execution.'
     },
     {
       id: 2,
       name: '02 · CONTROL PLANE',
-      sub: 'Router · Budget killswitch · Audit ledger',
-      desc: 'Enforces hard per-session token/dollar budgets, orchestrates human approvals via Slack, and hashes every step into an immutable SOC2 audit trail.'
+      sub: 'Token budgeting · Circuit breaker · Full audit trail',
+      desc: 'Enforces hard token & compute caps per repository and per developer. Halts executions when identical tool errors repeat 3 times, logging every prompt, bash command, and file diff into SOC 2 audit logs.'
     },
     {
       id: 1,
       name: '01 · EPHEMERAL SANDBOXES',
-      sub: 'One isolated microVM per task',
-      desc: 'Repo in, verified pull request out. MicroVM boots in 58ms, runs the test suite, emits the patch, and is completely destroyed. Zero lingering state.'
+      sub: 'Lightweight microVM / container in <3s',
+      desc: 'Clones repository into an isolated bubble. Agent runs tests, edits files, executes compilers, and emits a clean verified PR. Never touches developer laptops or production servers, and auto-destroys immediately.'
     },
     {
       id: 0,
-      name: '00 · YOUR CLOUD · VPC',
-      sub: 'AWS · Azure · GCP · on-prem',
-      desc: 'Runs inside your virtual private cloud. Sovereign by default: your proprietary code, customer records, and training data never leave your network.'
+      name: '00 · YOUR CLOUD · SOVEREIGN VPC',
+      sub: 'On-premise · Private VPC · Air-gapped',
+      desc: 'Deployable on your local AWS, Azure, GCP regions or air-gapped enterprise infrastructure. Built for banks, insurance, GCCs, and defense where proprietary code must never leave enterprise boundaries.'
     }
   ];
 
@@ -489,7 +489,7 @@ export default function E2BArchitectureVisual() {
               ref={svgRef}
               viewBox="0 0 820 680"
               role="img"
-              aria-label="Isometric diagram of Helm control plane"
+              aria-label="Isometric diagram of Clan control plane"
               onPointerMove={handleSvgPointerMove}
               className="w-full h-auto select-none touch-pan-y"
             />
@@ -611,39 +611,39 @@ export default function E2BArchitectureVisual() {
                 <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
                   01 · TASK IN
                 </span>
-                <b className="text-xs font-bold text-white block mb-1">A task arrives</b>
+                <b className="text-xs font-bold text-white block mb-1">Assignment arrives</b>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  An issue like #402 arrives via webhook from GitHub, Jira, Linear or Slack.
+                  Issue or feature ticket arrives via webhook from GitHub, Jira, Linear, or Slack.
                 </p>
               </div>
 
               <div className="step bg-[#0a0d0c] border border-white/[0.08] rounded-xl p-3.5 hover:border-[#a8e6cf]/40 transition-colors">
                 <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
-                  02 · ROUTE
+                  02 · ROUTE & HOT-SWAP
                 </span>
-                <b className="text-xs font-bold text-white block mb-1">Right agent, right model</b>
+                <b className="text-xs font-bold text-white block mb-1">Model-agnostic dispatch</b>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  The control plane picks an agent and automatically hot-swaps models if one fails.
+                  Orchestrator assigns the task. If a model loops or fails tests, it hot-swaps without prompt rewrites.
                 </p>
               </div>
 
               <div className="step bg-[#0a0d0c] border border-white/[0.08] rounded-xl p-3.5 hover:border-[#a8e6cf]/40 transition-colors">
                 <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
-                  03 · GATE
+                  03 · IAM & BOUNCER
                 </span>
-                <b className="text-xs font-bold text-white block mb-1">The gate checks everything</b>
+                <b className="text-xs font-bold text-white block mb-1">Pre-dispatch command filter</b>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Scoped, short-lived tokens only. Destructive actions are blocked pre-execution.
+                  Scoped temporary tokens only. Dangerous shell calls (rm -rf, config edits) killed pre-execution.
                 </p>
               </div>
 
               <div className="step bg-[#0a0d0c] border border-white/[0.08] rounded-xl p-3.5 hover:border-[#a8e6cf]/40 transition-colors">
                 <span className="n text-xs font-mono font-bold text-[#8fd9bb] block mb-1">
-                  04 · PR OUT
+                  04 · SANDBOX & PR OUT
                 </span>
-                <b className="text-xs font-bold text-white block mb-1">Sandbox, then verified PR</b>
+                <b className="text-xs font-bold text-white block mb-1">&lt;3s sandbox to verified PR</b>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Work runs in a throwaway microVM. Tests pass, PR is opened, sandbox destroyed.
+                  Isolated microVM runs test suites, emits clean Git pull request, and self-destructs immediately.
                 </p>
               </div>
 

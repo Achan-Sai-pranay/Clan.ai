@@ -1,18 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 
 const LOGS = [
-  'tool.call ok',
-  'sbx_3e8 boot 64ms',
-  'approval granted',
-  'policy.allow github.pr',
-  'llm.call 1.1s',
-  'secret.inject ok',
-  'trace.flush 214 spans',
-  'budget 82%',
-  'egress deny 0.0.0.0/0',
-  'snapshot saved',
-  'fork x12 ready',
-  'agent.done exit 0'
+  'sandbox boot <3s',
+  'pre-dispatch: rm -rf blocked',
+  'scoped secret proxy injected',
+  'token budget ok ($0.84 / $2.00)',
+  'hot-swap fallback -> Claude 3.5',
+  'human approval: slack #eng-leads',
+  'sister sandbox test pass',
+  'soc2 audit hash signed',
+  'unapproved egress blocked',
+  'agent.emit clean PR #402',
+  'sandbox auto-destroyed',
+  'zero state leaked'
 ];
 
 export default function FinalCTA() {
@@ -100,14 +100,14 @@ export default function FinalCTA() {
               WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 18%, #000 80%)'
             }}
           />
-          <span className="ey">Get started</span>
-          <h2>Give every agent a machine.</h2>
+          <span className="ey">Deploy the Control Plane</span>
+          <h2>Models and agents are disposable. Your control layer is permanent.</h2>
           <p className="ld" style={{ margin: '0 auto' }}>
-            Free to start. SOC 2 and GDPR ready. No credit card.
+            Available for on-premise private VPC, sovereign regions, and enterprise air-gapped clusters. SOC 2 and ISO compliance ready.
           </p>
           <div className="cta">
-            <a className="btn p" href="#">Start building →</a>
-            <a className="btn" href="#">Talk to an engineer</a>
+            <a className="btn p" href="#">Book Technical Demo →</a>
+            <a className="btn" href="#arch">Explore Architecture</a>
           </div>
         </div>
       </div>

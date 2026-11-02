@@ -3,17 +3,19 @@ import React, { useEffect, useRef } from 'react';
 const INTEGRATIONS = [
   'OpenAI',
   'Anthropic',
-  'Gemini',
+  'Google Gemini',
+  'vLLM / Ollama',
   'LangGraph',
   'CrewAI',
-  'Mastra',
   'GitHub',
+  'GitLab',
   'Slack',
+  'Microsoft Teams',
   'Jira',
-  'Postgres',
-  'AWS',
-  'GCP',
-  'Azure'
+  'Linear',
+  'AWS Private VPC',
+  'Azure Sovereign',
+  'GCP India / Global'
 ];
 
 export default function StatsIntegrations() {
@@ -59,20 +61,20 @@ export default function StatsIntegrations() {
       <div className="w rv" ref={statsRef}>
         <div className="stats">
           <div>
-            <b data-n="64" data-s="ms">64ms</b>
-            <span>Median sandbox boot</span>
+            <b data-n="3" data-s="s">&lt;3s</b>
+            <span>Sandbox spin-up time</span>
           </div>
           <div>
             <b data-n="100" data-s="%">100%</b>
-            <span>Actions audited</span>
+            <span>Prompts, diffs & tools audited</span>
           </div>
           <div>
-            <b data-n="200" data-s="+">200+</b>
-            <span>Tools via MCP</span>
+            <b data-n="0" data-s="">0</b>
+            <span>Master credentials exposed</span>
           </div>
           <div>
             <b data-n="99.99" data-s="%">99.99%</b>
-            <span>Uptime SLA</span>
+            <span>Enterprise SLA (SOC 2 ready)</span>
           </div>
         </div>
 
