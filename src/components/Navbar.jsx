@@ -18,9 +18,6 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="bar">
-        <b>Sovereign & On-Premises</b> · Private VPC deployment for global & regional enterprises is generally available →
-      </div>
       <nav>
         <div className="w">
           <a className="logo" href="#">
